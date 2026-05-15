@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- PARTICULAR siempre vía DIRECTO -->
+        <record id="ins_route_particular_directo" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_directo"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+        </record>
+
+        <!-- IAPOS atendida por AOSS (San Lorenzo Sud) y ASOR (Rosario) -->
+        <record id="ins_route_iapos_aoss" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_iapos"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+            <field name="observations">IAPOS factura vía AOSS para la región San Lorenzo Sud (incluye Roldán). Sistema de bonos.</field>
+        </record>
+
+        <record id="ins_route_iapos_asor" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_iapos"/>
+            <field name="billing_route_id" ref="billing_route_asor"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+        </record>
+
+        <!-- AVALIAN atendida por AOSS y ASOR -->
+        <record id="ins_route_avalian_aoss" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+            <field name="observations">Tarifario AVALIAN actualizado a 11/2025. Coseguro a cargo del socio.</field>
+        </record>
+
+        <record id="ins_route_avalian_asor" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_asor"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+        </record>
+
+        <!-- OSDE, Swiss, Galeno: vía AOSS (configurar otros según corresponda) -->
+        <record id="ins_route_osde_aoss" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_osde"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+        </record>
+
+        <record id="ins_route_swiss_aoss" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_swiss"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+        </record>
+
+        <record id="ins_route_galeno_aoss" model="clinic.insurance.route">
+            <field name="health_insurance_id" ref="health_insurance_galeno"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="accepts">True</field>
+            <field name="valid_from">2025-01-01</field>
+        </record>
+
+    </data>
+</odoo>

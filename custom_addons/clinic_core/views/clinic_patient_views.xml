@@ -102,6 +102,22 @@
                                     </field>
                                 </group>
                             </page>
+                            <page string="Coberturas" name="coverage">
+                                <field name="coverage_ids" context="{'default_patient_id': id}">
+                                    <list editable="bottom">
+                                        <field name="health_insurance_id" required="1"/>
+                                        <field name="member_number"/>
+                                        <field name="plan" optional="show"/>
+                                        <field name="is_holder" widget="boolean_toggle"/>
+                                        <field name="holder_partner_id" invisible="is_holder" required="not is_holder"/>
+                                        <field name="os_relationship"/>
+                                        <field name="is_primary" widget="boolean_toggle"/>
+                                        <field name="order" string="Prio" optional="hide"/>
+                                        <field name="valid_from" optional="hide"/>
+                                        <field name="valid_to" optional="hide"/>
+                                    </list>
+                                </field>
+                            </page>
                             <page string="Notas" name="notes">
                                 <group>
                                     <field name="secretariat_notes" placeholder="Notas operativas de la secretaría..." nolabel="1"/>

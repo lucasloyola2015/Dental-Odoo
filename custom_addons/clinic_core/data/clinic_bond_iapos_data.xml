@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Sistema de bonos IAPOS (valor de referencia, ajustable) -->
+        <record id="bond_iapos" model="clinic.bond.system">
+            <field name="health_insurance_id" ref="health_insurance_iapos"/>
+            <field name="bond_value">500.00</field>
+            <field name="format">mixed</field>
+            <field name="valid_from">2025-01-01</field>
+            <field name="observations">Sistema de bonos IAPOS. Formato MIXTO: bonos digitales aplican desde 04/2026, papel acepta hasta esa fecha. El paciente compra los bonos en boca de expendio o app digital y los entrega al profesional. Valor del bono actualizado periódicamente — verificar antes de presupuestar.</field>
+        </record>
+
+    </data>
+</odoo>

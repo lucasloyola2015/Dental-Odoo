@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="health_insurance_particular" model="clinic.health.insurance">
+            <field name="code">PARTICULAR</field>
+            <field name="name">Particular</field>
+            <field name="is_particular">True</field>
+            <field name="observations">Atención particular sin obra social. El paciente paga directo al profesional / clínica.</field>
+        </record>
+
+        <record id="health_insurance_iapos" model="clinic.health.insurance">
+            <field name="code">IAPOS</field>
+            <field name="name">IAPOS</field>
+            <field name="observations">Autorización en boca de expendio. Sin auditoría (prótesis lleva autorización aparte). Cantidad de prácticas: 3 por mes en general (códigos específicos se facturan solos como única práctica del mes). Pago en BONOS según prestación. Capítulo II y III: en menores se abona 10% más. Capítulo III: RX están incluidas en el valor del código. Implantes: 50% a cargo de IAPOS y 50% a cargo del afiliado. Periodoncia: códigos 0816/0817 hasta 6 elementos por mes con RX previa y ficha periodontal.</field>
+        </record>
+
+        <record id="health_insurance_avalian" model="clinic.health.insurance">
+            <field name="code">AVALIAN</field>
+            <field name="name">AVALIAN (ex ACA Salud)</field>
+            <field name="observations">Autorización al inicio de tratamiento, sin auditoría. Coseguro por diferencia de arancel del Colegio. Identificación: carnet de afiliado. 3 prestaciones por mes (incluyendo código de consulta). Kit bioseguridad COVID-19: sin cobertura. Garantía de obturaciones: 2 años por mismo profesional.</field>
+        </record>
+
+        <record id="health_insurance_osde" model="clinic.health.insurance">
+            <field name="code">OSDE</field>
+            <field name="name">OSDE</field>
+            <field name="observations">Cargar normas específicas según plan (210, 310, 410, etc.).</field>
+        </record>
+
+        <record id="health_insurance_swiss" model="clinic.health.insurance">
+            <field name="code">SWISS</field>
+            <field name="name">Swiss Medical</field>
+            <field name="observations"></field>
+        </record>
+
+        <record id="health_insurance_galeno" model="clinic.health.insurance">
+            <field name="code">GALENO</field>
+            <field name="name">Galeno</field>
+            <field name="observations"></field>
+        </record>
+
+    </data>
+</odoo>

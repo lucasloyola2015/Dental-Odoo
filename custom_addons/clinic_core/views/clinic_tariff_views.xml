@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_tariff_list" model="ir.ui.view">
+            <field name="name">clinic.tariff.list</field>
+            <field name="model">clinic.tariff</field>
+            <field name="arch" type="xml">
+                <list string="Tarifas OS" multi_edit="1">
+                    <field name="health_insurance_id"/>
+                    <field name="billing_route_id"/>
+                    <field name="practice_id"/>
+                    <field name="amount_paid_by_os" sum="Total"/>
+                    <field name="bond_count" sum="Total bonos"/>
+                    <field name="has_stamp" widget="boolean_toggle" optional="hide"/>
+                    <field name="stamp_value" optional="hide"/>
+                    <field name="valid_from"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_tariff_form" model="ir.ui.view">
+            <field name="name">clinic.tariff.form</field>
+            <field name="model">clinic.tariff</field>
+            <field name="arch" type="xml">
+                <form string="Tarifa">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="health_insurance_id"/>
+                                <field name="billing_route_id"/>
+                                <field name="practice_id"/>
+                                <field name="valid_from"/>
+                            </group>
+                            <group string="Pago de la OS">
+                                <field name="amount_paid_by_os"/>
+                                <field name="bond_count"/>
+                                <field name="has_stamp"/>
+                                <field name="stamp_value" invisible="not has_stamp"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Observaciones" name="observations">
+                                <field name="observations" nolabel="1"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_tariff_search" model="ir.ui.view">
+            <field name="name">clinic.tariff.search</field>
+            <field name="model">clinic.tariff</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="health_insurance_id"/>
+                    <field name="billing_route_id"/>
+                    <field name="practice_id"/>
+                    <separator/>
+                    <filter name="filter_paid_money" string="Pago en pesos" domain="[('amount_paid_by_os', '>', 0)]"/>
+                    <filter name="filter_paid_bonds" string="Pago en bonos" domain="[('bond_count', '>', 0)]"/>
+                    <separator/>
+                    <group>
+                        <filter name="group_by_os" string="Obra social" domain="[]" context="{'group_by': 'health_insurance_id'}"/>
+                        <filter name="group_by_route" string="Vía" domain="[]" context="{'group_by': 'billing_route_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_tariff" model="ir.actions.act_window">
+            <field name="name">Tarifas OS</field>
+            <field name="res_model">clinic.tariff</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_tariff_search"/>
+        </record>
+
+        <menuitem
+            id="menu_clinic_tariff"
+            name="Tarifas"
+            parent="menu_clinic_configuration"
+            action="action_clinic_tariff"
+            sequence="60"/>
+
+        <!-- Bond system -->
+        <record id="view_clinic_bond_system_list" model="ir.ui.view">
+            <field name="name">clinic.bond.system.list</field>
+            <field name="model">clinic.bond.system</field>
+            <field name="arch" type="xml">
+                <list string="Sistemas de bonos">
+                    <field name="health_insurance_id"/>
+                    <field name="billing_route_id"/>
+                    <field name="bond_value"/>
+                    <field name="format"/>
+                    <field name="valid_from"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_bond_system_form" model="ir.ui.view">
+            <field name="name">clinic.bond.system.form</field>
+            <field name="model">clinic.bond.system</field>
+            <field name="arch" type="xml">
+                <form string="Sistema de bonos">
+                    <sheet>
+                        <field name="active" invisible="1"/>
+                        <group>
+                            <group>
+                                <field name="health_insurance_id"/>
+                                <field name="billing_route_id"/>
+                                <field name="format"/>
+                            </group>
+                            <group>
+                                <field name="bond_value"/>
+                                <field name="valid_from"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <field name="observations" placeholder="Notas..."/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_clinic_bond_system" model="ir.actions.act_window">
+            <field name="name">Sistemas de bonos</field>
+            <field name="res_model">clinic.bond.system</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_bond_system"
+            name="Bonos"
+            parent="menu_clinic_configuration"
+            action="action_clinic_bond_system"
+            sequence="70"/>
+
+        <!-- Copayment -->
+        <record id="view_clinic_copayment_list" model="ir.ui.view">
+            <field name="name">clinic.copayment.list</field>
+            <field name="model">clinic.copayment</field>
+            <field name="arch" type="xml">
+                <list string="Copagos" multi_edit="1">
+                    <field name="health_insurance_id"/>
+                    <field name="practice_id"/>
+                    <field name="amount" sum="Total"/>
+                    <field name="valid_from"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_copayment_form" model="ir.ui.view">
+            <field name="name">clinic.copayment.form</field>
+            <field name="model">clinic.copayment</field>
+            <field name="arch" type="xml">
+                <form string="Copago">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="health_insurance_id"/>
+                                <field name="practice_id"/>
+                            </group>
+                            <group>
+                                <field name="amount"/>
+                                <field name="valid_from"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <field name="observations" placeholder="Notas..."/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_clinic_copayment" model="ir.actions.act_window">
+            <field name="name">Copagos</field>
+            <field name="res_model">clinic.copayment</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_copayment"
+            name="Copagos"
+            parent="menu_clinic_configuration"
+            action="action_clinic_copayment"
+            sequence="80"/>
+
+        <!-- Practice code OS -->
+        <record id="view_clinic_practice_code_os_list" model="ir.ui.view">
+            <field name="name">clinic.practice.code.os.list</field>
+            <field name="model">clinic.practice.code.os</field>
+            <field name="arch" type="xml">
+                <list string="Códigos OS" multi_edit="1">
+                    <field name="health_insurance_id"/>
+                    <field name="practice_id"/>
+                    <field name="os_code"/>
+                    <field name="os_name" optional="show"/>
+                    <field name="valid_from"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_practice_code_os_form" model="ir.ui.view">
+            <field name="name">clinic.practice.code.os.form</field>
+            <field name="model">clinic.practice.code.os</field>
+            <field name="arch" type="xml">
+                <form string="Código OS">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="health_insurance_id"/>
+                                <field name="practice_id"/>
+                            </group>
+                            <group>
+                                <field name="os_code"/>
+                                <field name="os_name"/>
+                                <field name="valid_from"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <field name="notes" placeholder="Notas..."/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_clinic_practice_code_os" model="ir.actions.act_window">
+            <field name="name">Códigos OS por práctica</field>
+            <field name="res_model">clinic.practice.code.os</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_practice_code_os"
+            name="Códigos OS"
+            parent="menu_clinic_configuration"
+            action="action_clinic_practice_code_os"
+            sequence="90"/>
+
+    </data>
+</odoo>

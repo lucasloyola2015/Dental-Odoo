@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="billing_route_directo" model="clinic.billing.route">
+            <field name="code">DIRECTO</field>
+            <field name="name">Directo</field>
+            <field name="requires_membership">False</field>
+            <field name="observations">Facturación directa al paciente (particular) o emisión propia.</field>
+        </record>
+
+        <record id="billing_route_asor" model="clinic.billing.route">
+            <field name="code">ASOR</field>
+            <field name="name">ASOR (Rosario)</field>
+            <field name="requires_membership">True</field>
+            <field name="observations">Asociación Odontológica de Rosario. Recibe prestaciones, audita, factura a las OS y distribuye pago al profesional. Audita prótesis presencial los martes y jueves de 9 a 12hs.</field>
+        </record>
+
+        <record id="billing_route_aoss" model="clinic.billing.route">
+            <field name="code">AOSS</field>
+            <field name="name">AOSS (San Lorenzo Sud)</field>
+            <field name="requires_membership">True</field>
+            <field name="observations">Asociación Odontológica de San Lorenzo Sud. Sede en Pujato. Recibe prestaciones de la región (incluye Roldán), audita, factura a las OS y distribuye pago al profesional.</field>
+        </record>
+
+    </data>
+</odoo>

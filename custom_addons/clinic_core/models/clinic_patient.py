@@ -47,6 +47,11 @@ class ClinicPatient(models.Model):
         string="Motivo de baja",
     )
     active = fields.Boolean(default=True, tracking=True)
+    coverage_ids = fields.One2many(
+        comodel_name="clinic.patient.coverage",
+        inverse_name="patient_id",
+        string="Coberturas (Obras sociales)",
+    )
 
     _hcn_unique_per_company = models.Constraint(
         "unique (medical_history_number, company_id)",

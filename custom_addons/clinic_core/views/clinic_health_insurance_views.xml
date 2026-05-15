@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_health_insurance_list" model="ir.ui.view">
+            <field name="name">clinic.health.insurance.list</field>
+            <field name="model">clinic.health.insurance</field>
+            <field name="arch" type="xml">
+                <list string="Obras sociales">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="is_particular" widget="boolean_toggle"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_health_insurance_form" model="ir.ui.view">
+            <field name="name">clinic.health.insurance.form</field>
+            <field name="model">clinic.health.insurance</field>
+            <field name="arch" type="xml">
+                <form string="Obra social">
+                    <sheet>
+                        <widget name="web_ribbon" title="Archivada" bg_color="text-bg-danger" invisible="active"/>
+                        <field name="active" invisible="1"/>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name" placeholder="Ej: AVALIAN"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="code" placeholder="Ej: AVALIAN"/>
+                                <field name="is_particular"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Observaciones / Normas" name="observations">
+                                <field name="observations" nolabel="1" placeholder="Normas generales de la obra social..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_health_insurance_search" model="ir.ui.view">
+            <field name="name">clinic.health.insurance.search</field>
+            <field name="model">clinic.health.insurance</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <separator/>
+                    <filter name="filter_particular" string="Particular" domain="[('is_particular', '=', True)]"/>
+                    <filter name="filter_archived" string="Archivadas" domain="[('active', '=', False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_health_insurance" model="ir.actions.act_window">
+            <field name="name">Obras sociales</field>
+            <field name="res_model">clinic.health.insurance</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_health_insurance_search"/>
+        </record>
+
+        <menuitem
+            id="menu_clinic_health_insurance"
+            name="Obras sociales"
+            parent="menu_clinic_configuration"
+            action="action_clinic_health_insurance"
+            sequence="30"/>
+
+    </data>
+</odoo>

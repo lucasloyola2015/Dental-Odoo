@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- AVALIAN vía AOSS — Vigencia desde 11/2025 -->
+
+        <record id="tariff_avalian_aoss_01_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_01_01"/>
+            <field name="amount_paid_by_os">18119.40</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_01_04" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_01_04"/>
+            <field name="amount_paid_by_os">24461.18</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_02_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_02_01"/>
+            <field name="amount_paid_by_os">36936.39</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_02_02" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_02_02"/>
+            <field name="amount_paid_by_os">45751.47</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_02_03" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_02_03"/>
+            <field name="amount_paid_by_os">54358.19</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_03_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_03_01"/>
+            <field name="amount_paid_by_os">86973.10</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_03_02" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_03_02"/>
+            <field name="amount_paid_by_os">134800.73</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_03_03" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_03_03"/>
+            <field name="amount_paid_by_os">158111.49</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_03_04" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_03_04"/>
+            <field name="amount_paid_by_os">158452.89</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_05_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_05_01"/>
+            <field name="amount_paid_by_os">26010.40</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_05_02" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_05_02"/>
+            <field name="amount_paid_by_os">17476.16</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_09_01_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_09_01_01"/>
+            <field name="amount_paid_by_os">9204.65</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_09_02_04" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_09_02_04"/>
+            <field name="amount_paid_by_os">31994.32</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_09_02_05" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_09_02_05"/>
+            <field name="amount_paid_by_os">31993.51</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_09_02_07" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_09_02_07"/>
+            <field name="amount_paid_by_os">32746.27</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_avalian_aoss_10_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="billing_route_id" ref="billing_route_aoss"/>
+            <field name="practice_id" ref="practice_10_01"/>
+            <field name="amount_paid_by_os">42127.60</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+    </data>
+</odoo>

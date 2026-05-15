@@ -4,3 +4,12 @@ from . import clinic_patient
 from . import clinic_contact
 from . import clinic_person_contact
 from . import clinic_person_link
+from . import clinic_health_insurance
+from . import clinic_billing_route
+from . import clinic_insurance_route
+from . import clinic_practice
+from . import clinic_patient_coverage
+from . import clinic_tariff
+from . import clinic_bond_system
+from . import clinic_copayment
+from . import clinic_practice_code_os

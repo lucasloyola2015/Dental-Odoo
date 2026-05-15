@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 1 — CONSULTAS                                       -->
+        <!-- =========================================================== -->
+
+        <record id="practice_01_01" model="clinic.practice">
+            <field name="faco_code">01.01</field>
+            <field name="name">Examen, fichado, diagnóstico y plan de tratamiento</field>
+            <field name="short_name">Examen y diagnóstico</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Examen clínico completo, fichado, diagnóstico y plan de tratamiento. Se reconoce 1 vez al año si la realiza el mismo prestador.</field>
+        </record>
+
+        <record id="practice_01_04" model="clinic.practice">
+            <field name="faco_code">01.04</field>
+            <field name="name">Consulta de urgencia</field>
+            <field name="short_name">Urgencia</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Atención sin turno previo que resuelve una demanda espontánea. Aplica a prestaciones que no constituyen paso intermedio de tratamiento. Ej: pericoronaritis, estomatitis, alveolitis.</field>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 2 — OPERATORIA                                      -->
+        <!-- =========================================================== -->
+
+        <record id="practice_02_01" model="clinic.practice">
+            <field name="faco_code">02.01</field>
+            <field name="name">Restauración simple. Todo tipo de material</field>
+            <field name="short_name">Restauración simple</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Obturación que abarca una cara de la pieza (oclusal, gingival, mesial o distal). Garantía: 2 años por el mismo profesional.</field>
+        </record>
+
+        <record id="practice_02_02" model="clinic.practice">
+            <field name="faco_code">02.02</field>
+            <field name="name">Restauración compuesta. Todo tipo de material</field>
+            <field name="short_name">Restauración compuesta</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Obturación que abarca dos caras contiguas de la pieza. Garantía: 2 años por el mismo profesional.</field>
+        </record>
+
+        <record id="practice_02_03" model="clinic.practice">
+            <field name="faco_code">02.03</field>
+            <field name="name">Restauración compleja. Todo tipo de material</field>
+            <field name="short_name">Restauración compleja</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Obturación que abarca tres caras contiguas de la pieza. Garantía: 2 años por el mismo profesional.</field>
+        </record>
+
+        <record id="practice_02_04" model="clinic.practice">
+            <field name="faco_code">02.04</field>
+            <field name="name">Reconstrucción con amalgama y tornillo en conducto</field>
+            <field name="short_name">Reconstr. amalgama + tornillo</field>
+            <field name="slots_required">4</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Reconstrucción que requiere radiografía post operatoria para visualizar el tornillo.</field>
+        </record>
+
+        <record id="practice_02_09" model="clinic.practice">
+            <field name="faco_code">02.09</field>
+            <field name="name">Reconstrucción de ángulo en dientes anteriores</field>
+            <field name="short_name">Reconstrucción ángulo</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Reconstrucción de ángulo con material estético en dientes anteriores (de canino a canino).</field>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 3 — ENDODONCIA                                      -->
+        <!-- =========================================================== -->
+
+        <record id="practice_03_01" model="clinic.practice">
+            <field name="faco_code">03.01</field>
+            <field name="name">Tratamiento pulpar de 1 conducto (unirradicular)</field>
+            <field name="short_name">Endodoncia 1 conducto</field>
+            <field name="slots_required">4</field>
+            <field name="specialty_id" ref="specialty_endodoncia"/>
+            <field name="description">Tratamiento de endodoncia en pieza unirradicular. Garantía: 2 años por mismo profesional. Excluye Rx.</field>
+        </record>
+
+        <record id="practice_03_02" model="clinic.practice">
+            <field name="faco_code">03.02</field>
+            <field name="name">Tratamiento pulpar de 2 conductos (birradicular)</field>
+            <field name="short_name">Endodoncia 2 conductos</field>
+            <field name="slots_required">5</field>
+            <field name="specialty_id" ref="specialty_endodoncia"/>
+            <field name="description">Tratamiento de endodoncia en pieza birradicular. Garantía: 2 años. Excluye Rx.</field>
+        </record>
+
+        <record id="practice_03_03" model="clinic.practice">
+            <field name="faco_code">03.03</field>
+            <field name="name">Tratamiento pulpar de 3 conductos</field>
+            <field name="short_name">Endodoncia 3 conductos</field>
+            <field name="slots_required">6</field>
+            <field name="specialty_id" ref="specialty_endodoncia"/>
+            <field name="description">Tratamiento de endodoncia en pieza con 3 conductos radiculares. Garantía: 2 años. Excluye Rx.</field>
+        </record>
+
+        <record id="practice_03_04" model="clinic.practice">
+            <field name="faco_code">03.04</field>
+            <field name="name">Tratamiento pulpar de 4 o más conductos</field>
+            <field name="short_name">Endodoncia 4+ conductos</field>
+            <field name="slots_required">6</field>
+            <field name="specialty_id" ref="specialty_endodoncia"/>
+            <field name="description">Tratamiento de endodoncia en pieza con 4 o más conductos radiculares. Garantía: 2 años. Excluye Rx.</field>
+        </record>
+
+        <record id="practice_03_05" model="clinic.practice">
+            <field name="faco_code">03.05</field>
+            <field name="name">Biopulpectomía parcial</field>
+            <field name="short_name">Biopulpectomía parcial</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_endodoncia"/>
+            <field name="description">No se reconoce otro tratamiento de endodoncia ni su restauración coronaria hasta 1 año después si la realiza el mismo profesional.</field>
+        </record>
+
+        <record id="practice_03_06" model="clinic.practice">
+            <field name="faco_code">03.06</field>
+            <field name="name">Necropulpectomía parcial (momificación)</field>
+            <field name="short_name">Necropulpectomía</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_endodoncia"/>
+            <field name="description">Se reconoce solamente en dientes posteriores. Excluye Rx.</field>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 5 — PREVENTIVA                                      -->
+        <!-- =========================================================== -->
+
+        <record id="practice_05_01" model="clinic.practice">
+            <field name="faco_code">05.01</field>
+            <field name="name">Tartrectomía y cepillado mecánico</field>
+            <field name="short_name">Limpieza dental</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+            <field name="description">Se reconoce una vez por año.</field>
+        </record>
+
+        <record id="practice_05_02" model="clinic.practice">
+            <field name="faco_code">05.02</field>
+            <field name="name">Topicación con flúor</field>
+            <field name="short_name">Flúor</field>
+            <field name="slots_required">1</field>
+            <field name="specialty_id" ref="specialty_odontopediatria"/>
+            <field name="description">Aplicación de flúor en ambas arcadas. Se reconoce semestralmente y hasta cumplir los 13 años de edad inclusive.</field>
+        </record>
+
+        <record id="practice_05_04" model="clinic.practice">
+            <field name="faco_code">05.04</field>
+            <field name="name">Detección de placa bacteriana y enseñanza de técnica de higiene oral</field>
+            <field name="short_name">Detección placa y enseñanza</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+        </record>
+
+        <record id="practice_05_05" model="clinic.practice">
+            <field name="faco_code">05.05</field>
+            <field name="name">Selladores de fosas y fisuras en elementos posteriores (por pieza)</field>
+            <field name="short_name">Selladores</field>
+            <field name="slots_required">1</field>
+            <field name="specialty_id" ref="specialty_odontopediatria"/>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 7 — ODONTOPEDIATRÍA                                 -->
+        <!-- =========================================================== -->
+
+        <record id="practice_07_01" model="clinic.practice">
+            <field name="faco_code">07.01</field>
+            <field name="name">Motivación en menores de 13 años</field>
+            <field name="short_name">Motivación niños</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_odontopediatria"/>
+            <field name="description">Hasta tres consultas. Se realiza por única vez con el mismo profesional. Incluye 01.01 por única vez.</field>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 8 — PERIODONCIA                                     -->
+        <!-- =========================================================== -->
+
+        <record id="practice_08_01" model="clinic.practice">
+            <field name="faco_code">08.01</field>
+            <field name="name">Consulta periodontal, diagnóstico, pronóstico</field>
+            <field name="short_name">Consulta periodontal</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_periodoncia"/>
+        </record>
+
+        <record id="practice_08_02" model="clinic.practice">
+            <field name="faco_code">08.02</field>
+            <field name="name">Tratamiento de gingivitis marginal crónica (ambas arcadas)</field>
+            <field name="short_name">Tratamiento gingivitis</field>
+            <field name="slots_required">3</field>
+            <field name="specialty_id" ref="specialty_periodoncia"/>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 9 — RADIOLOGÍA                                      -->
+        <!-- =========================================================== -->
+
+        <record id="practice_09_01_01" model="clinic.practice">
+            <field name="faco_code">09.01.01</field>
+            <field name="name">Rx periapical</field>
+            <field name="short_name">Rx periapical</field>
+            <field name="slots_required">1</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+        </record>
+
+        <record id="practice_09_01_02" model="clinic.practice">
+            <field name="faco_code">09.01.02</field>
+            <field name="name">Rx Bite wing</field>
+            <field name="short_name">Rx Bite wing</field>
+            <field name="slots_required">1</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+        </record>
+
+        <record id="practice_09_02_04" model="clinic.practice">
+            <field name="faco_code">09.02.04</field>
+            <field name="name">Pantomografía</field>
+            <field name="short_name">Pantomografía</field>
+            <field name="slots_required">1</field>
+            <field name="specialty_id" ref="specialty_odontologia"/>
+        </record>
+
+        <record id="practice_09_02_05" model="clinic.practice">
+            <field name="faco_code">09.02.05</field>
+            <field name="name">Tele-radiografía cefalométrica</field>
+            <field name="short_name">Tele-Rx</field>
+            <field name="slots_required">1</field>
+            <field name="specialty_id" ref="specialty_ortodoncia"/>
+        </record>
+
+        <record id="practice_09_02_07" model="clinic.practice">
+            <field name="faco_code">09.02.07</field>
+            <field name="name">Cefalometría</field>
+            <field name="short_name">Cefalometría</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_ortodoncia"/>
+            <field name="description">AVALIAN usa código propio 346027 para esta práctica.</field>
+        </record>
+
+        <!-- =========================================================== -->
+        <!-- CAPÍTULO 10 — CIRUGÍA                                        -->
+        <!-- =========================================================== -->
+
+        <record id="practice_10_01" model="clinic.practice">
+            <field name="faco_code">10.01</field>
+            <field name="name">Extracción dentaria</field>
+            <field name="short_name">Extracción</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_cirugia_oral"/>
+            <field name="description">Pieza dentaria o resto radicular, incluido submucosos. Debe efectuarse extracción completa sin que quede ningún remanente.</field>
+        </record>
+
+        <record id="practice_10_06" model="clinic.practice">
+            <field name="faco_code">10.06</field>
+            <field name="name">Incisión y drenaje de abscesos por vía endobucal</field>
+            <field name="short_name">Drenaje absceso</field>
+            <field name="slots_required">2</field>
+            <field name="specialty_id" ref="specialty_cirugia_oral"/>
+        </record>
+
+        <record id="practice_10_09" model="clinic.practice">
+            <field name="faco_code">10.09</field>
+            <field name="name">Extracción de diente retenido con tapa ósea total o parcial</field>
+            <field name="short_name">Extracción retenido</field>
+            <field name="slots_required">4</field>
+            <field name="specialty_id" ref="specialty_cirugia_oral"/>
+        </record>
+
+    </data>
+</odoo>

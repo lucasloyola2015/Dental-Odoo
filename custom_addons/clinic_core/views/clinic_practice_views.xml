@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_practice_list" model="ir.ui.view">
+            <field name="name">clinic.practice.list</field>
+            <field name="model">clinic.practice</field>
+            <field name="arch" type="xml">
+                <list string="Prácticas (FACO)" multi_edit="1">
+                    <field name="faco_code"/>
+                    <field name="name"/>
+                    <field name="faco_chapter" string="Cap"/>
+                    <field name="slots_required" string="Slots (15')"/>
+                    <field name="specialty_id" optional="show"/>
+                    <field name="is_new_code" widget="boolean_toggle" optional="hide"/>
+                    <field name="is_to_be_arranged" widget="boolean_toggle" optional="hide"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_practice_form" model="ir.ui.view">
+            <field name="name">clinic.practice.form</field>
+            <field name="model">clinic.practice</field>
+            <field name="arch" type="xml">
+                <form string="Práctica">
+                    <sheet>
+                        <widget name="web_ribbon" title="Archivada" bg_color="text-bg-danger" invisible="active"/>
+                        <field name="active" invisible="1"/>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name" placeholder="Ej: Examen, fichado, diagnóstico y plan de tratamiento"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Identificación">
+                                <field name="faco_code" placeholder="01.01"/>
+                                <field name="faco_chapter" readonly="1"/>
+                                <field name="short_name" placeholder="Examen"/>
+                                <field name="specialty_id"/>
+                            </group>
+                            <group string="Operación">
+                                <field name="slots_required"/>
+                                <field name="is_new_code"/>
+                                <field name="is_to_be_arranged"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Descripción" name="description">
+                                <field name="description" nolabel="1" placeholder="Descripción completa de la práctica..."/>
+                            </page>
+                            <page string="Observaciones / Normas" name="observations">
+                                <field name="observations" nolabel="1" placeholder="Normas del Colegio o particularidades..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_practice_search" model="ir.ui.view">
+            <field name="name">clinic.practice.search</field>
+            <field name="model">clinic.practice</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="faco_code"/>
+                    <field name="specialty_id"/>
+                    <separator/>
+                    <filter name="filter_new_codes" string="Códigos nuevos" domain="[('is_new_code', '=', True)]"/>
+                    <filter name="filter_to_arrange" string="A convenir" domain="[('is_to_be_arranged', '=', True)]"/>
+                    <filter name="filter_archived" string="Archivadas" domain="[('active', '=', False)]"/>
+                    <separator/>
+                    <group>
+                        <filter name="group_by_chapter" string="Capítulo" domain="[]" context="{'group_by': 'faco_chapter'}"/>
+                        <filter name="group_by_specialty" string="Especialidad" domain="[]" context="{'group_by': 'specialty_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_practice" model="ir.actions.act_window">
+            <field name="name">Prácticas (FACO)</field>
+            <field name="res_model">clinic.practice</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_practice_search"/>
+        </record>
+
+        <menuitem
+            id="menu_clinic_practice"
+            name="Prácticas (FACO)"
+            parent="menu_clinic_configuration"
+            action="action_clinic_practice"
+            sequence="20"/>
+
+    </data>
+</odoo>

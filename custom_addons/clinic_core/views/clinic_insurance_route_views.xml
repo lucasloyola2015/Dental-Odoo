@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_insurance_route_list" model="ir.ui.view">
+            <field name="name">clinic.insurance.route.list</field>
+            <field name="model">clinic.insurance.route</field>
+            <field name="arch" type="xml">
+                <list string="Matriz OS / Vía">
+                    <field name="health_insurance_id"/>
+                    <field name="billing_route_id"/>
+                    <field name="accepts" widget="boolean_toggle"/>
+                    <field name="requires_authorization" widget="boolean_toggle"/>
+                    <field name="valid_from"/>
+                    <field name="valid_to" optional="hide"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_insurance_route_form" model="ir.ui.view">
+            <field name="name">clinic.insurance.route.form</field>
+            <field name="model">clinic.insurance.route</field>
+            <field name="arch" type="xml">
+                <form string="Obra social por vía">
+                    <sheet>
+                        <field name="active" invisible="1"/>
+                        <group>
+                            <group>
+                                <field name="health_insurance_id"/>
+                                <field name="billing_route_id"/>
+                                <field name="accepts"/>
+                                <field name="requires_authorization"/>
+                            </group>
+                            <group>
+                                <field name="valid_from"/>
+                                <field name="valid_to"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Observaciones" name="observations">
+                                <field name="observations" nolabel="1" placeholder="Normas específicas..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_insurance_route_search" model="ir.ui.view">
+            <field name="name">clinic.insurance.route.search</field>
+            <field name="model">clinic.insurance.route</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="health_insurance_id"/>
+                    <field name="billing_route_id"/>
+                    <separator/>
+                    <filter name="filter_accepts" string="Aceptadas" domain="[('accepts', '=', True)]"/>
+                    <separator/>
+                    <group>
+                        <filter name="group_by_os" string="Obra social" domain="[]" context="{'group_by': 'health_insurance_id'}"/>
+                        <filter name="group_by_route" string="Vía" domain="[]" context="{'group_by': 'billing_route_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_insurance_route" model="ir.actions.act_window">
+            <field name="name">OS / Vías (matriz)</field>
+            <field name="res_model">clinic.insurance.route</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_insurance_route_search"/>
+        </record>
+
+        <menuitem
+            id="menu_clinic_insurance_route"
+            name="OS / Vías (matriz)"
+            parent="menu_clinic_configuration"
+            action="action_clinic_insurance_route"
+            sequence="50"/>
+
+    </data>
+</odoo>
