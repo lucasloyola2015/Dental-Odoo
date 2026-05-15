@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+import pytz
+
 from odoo import _, api, fields, models
 
 
@@ -156,30 +158,45 @@ class HrEmployee(models.Model):
         if not calendar:
             return []
 
-        # 1. Working intervals from resource.calendar
+        # Make datetimes tz-aware (required by v19 _attendance_intervals_batch).
+        # Naive datetimes are interpreted as user's local timezone.
+        user_tz = pytz.timezone(self.env.user.tz or "UTC")
+        df_aware = user_tz.localize(date_from) if date_from.tzinfo is None else date_from
+        dt_aware = user_tz.localize(date_to) if date_to.tzinfo is None else date_to
+
+        # 1. Working intervals from resource.calendar (tz-aware in/out)
         work_intervals_dict = calendar._work_intervals_batch(
-            date_from, date_to, resources=self.resource_id,
+            df_aware, dt_aware, resources=self.resource_id,
         )
         work_intervals = list(work_intervals_dict.get(self.resource_id.id, []))
 
-        # 2. Existing appointments in window
+        # Normalize to UTC-naive for internal comparison (Odoo stores Datetime as UTC-naive)
+        def to_utc_naive(dt):
+            if dt.tzinfo is None:
+                return dt
+            return dt.astimezone(pytz.UTC).replace(tzinfo=None)
+
+        work_intervals_naive = [(to_utc_naive(wi[0]), to_utc_naive(wi[1])) for wi in work_intervals]
+        df_naive = to_utc_naive(df_aware)
+        dt_naive = to_utc_naive(dt_aware)
+
+        # 2. Existing appointments in window (Datetime fields are UTC-naive in DB)
         blocking_states = ("pending", "booked", "checked-in", "arrived", "fulfilled")
         existing = self.env["clinic.appointment"].search([
             ("practitioner_id", "=", self.id),
             ("company_id", "=", company.id),
             ("state", "in", blocking_states),
-            ("start_datetime", "<", date_to),
-            ("end_datetime", ">", date_from),
+            ("start_datetime", "<", dt_naive),
+            ("end_datetime", ">", df_naive),
         ])
         buffer = timedelta(minutes=self.slots_buffer_post_minutes or 0)
         busy = [(appt.start_datetime, appt.end_datetime + buffer) for appt in existing]
 
-        # 3. Slide window
+        # 3. Slide window (all naive UTC)
         slot_delta = timedelta(minutes=duration_minutes)
         step_delta = timedelta(minutes=step_minutes)
         available = []
-        for wi in work_intervals:
-            wi_start, wi_end = wi[0], wi[1]
+        for wi_start, wi_end in work_intervals_naive:
             candidate = wi_start
             while candidate + slot_delta <= wi_end:
                 candidate_end = candidate + slot_delta
