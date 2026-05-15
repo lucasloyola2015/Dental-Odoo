@@ -155,9 +155,29 @@ class ClinicPatient(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        import re
         for vals in vals_list:
-            vals.setdefault("partner_id", False)
-            if vals.get("partner_id"):
+            # If no partner is explicitly linked, try to reuse one by DNI (vat).
+            # This handles the case where the secretary types a DNI of an
+            # already-known person (employee, OSDE holder, etc.) and we want
+            # to attach the new patient record to the SAME res.partner instead
+            # of creating a duplicate.
+            if not vals.get("partner_id"):
+                vat = vals.get("vat")
+                if vat:
+                    cleaned = re.sub(r"[\s\.\-]", "", vat)
+                    if re.fullmatch(r"\d{7,8}", cleaned):
+                        existing = self.env["res.partner"].search(
+                            [("vat", "=", cleaned)], limit=1
+                        )
+                        if existing:
+                            vals["partner_id"] = existing.id
+                            # Drop delegated fields that the partner already has.
+                            # We keep clinic-specific ones (HC, secretariat_notes...).
+                            for f in ("name", "birthdate", "gender", "phone", "email", "vat"):
+                                vals.pop(f, None)
+                            existing.is_clinic_person = True
+            else:
                 self.env["res.partner"].browse(vals["partner_id"]).is_clinic_person = True
             # Auto-generate HC number from sequence
             hcn = vals.get("medical_history_number")
@@ -169,6 +189,62 @@ class ClinicPatient(models.Model):
             if not rec.partner_id.is_clinic_person:
                 rec.partner_id.is_clinic_person = True
         return records
+
+    @api.onchange("vat")
+    def _onchange_vat_autofill_existing(self):
+        """When DNI matches an existing partner, auto-fill the form.
+
+        Two scenarios:
+        - Person already a patient in this company → warn duplicate; user should cancel
+        - Person exists but not a patient yet (employee, OSDE holder, contact) →
+          auto-fill demographics; on save the partner will be reused (no duplicate)
+        """
+        import re
+        if not self.vat:
+            return
+        cleaned = re.sub(r"[\s\.\-]", "", self.vat)
+        if not re.fullmatch(r"\d{7,8}", cleaned):
+            return
+        # Only act on new records (no _origin id means we're creating)
+        if self._origin and self._origin.id:
+            return
+        existing = self.env["res.partner"].search([("vat", "=", cleaned)], limit=1)
+        if not existing:
+            return
+        # Check if already a patient in current company
+        existing_patient = self.env["clinic.patient"].with_context(active_test=False).search([
+            ("partner_id", "=", existing.id),
+            ("company_id", "=", (self.company_id.id if self.company_id else self.env.company.id)),
+        ], limit=1)
+        if existing_patient:
+            # Duplicate risk — don't autofill, warn loudly
+            return {
+                "warning": {
+                    "title": "Ya es paciente",
+                    "message": (
+                        f"'{existing.name}' YA es paciente en esta clínica "
+                        f"(HC {existing_patient.medical_history_number}).\n\n"
+                        f"Cancelá este formulario y abrí su ficha desde la lista de pacientes "
+                        f"para editar sus datos."
+                    ),
+                }
+            }
+        # Person exists but is not a patient yet — autofill silently
+        self.name = existing.name
+        self.birthdate = existing.birthdate
+        self.gender = existing.gender
+        self.phone = existing.phone
+        self.email = existing.email
+        return {
+            "warning": {
+                "title": "Persona reconocida",
+                "message": (
+                    f"'{existing.name}' ya existe en el sistema (como contacto, profesional "
+                    f"o titular de OS). Se completaron sus datos automáticamente. Al guardar, "
+                    f"se le agregará la ficha de paciente sin duplicar el contacto."
+                ),
+            }
+        }
 
     def action_view_partner(self):
         self.ensure_one()
