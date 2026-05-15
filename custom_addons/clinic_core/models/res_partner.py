@@ -107,6 +107,57 @@ class ResPartner(models.Model):
         if self.is_clinic_person and self.vat:
             self.vat = re.sub(r"[\s\.\-]", "", self.vat)
 
+    @api.onchange("vat")
+    def _onchange_vat_check_existing(self):
+        """When typing a DNI, warn if another clinic person already has it.
+
+        Useful at patient creation: the secretary types the DNI first, and
+        the system tells her 'this person already exists, use the Persona
+        field above to reuse instead of creating a duplicate'.
+        """
+        if not self.is_clinic_person or not self.vat:
+            return
+        cleaned = re.sub(r"[\s\.\-]", "", self.vat)
+        if not re.fullmatch(r"\d{7,8}", cleaned):
+            return
+        origin_id = self._origin.id if self._origin else 0
+        existing = self.env["res.partner"].search([
+            ("vat", "=", cleaned),
+            ("is_clinic_person", "=", True),
+            ("id", "!=", origin_id),
+        ], limit=1)
+        if existing:
+            return {
+                "warning": {
+                    "title": "Persona ya registrada",
+                    "message": (
+                        f"Ya existe una persona con DNI {cleaned}: {existing.name}.\n\n"
+                        f"Si es la misma persona, cancelá este formulario y al crear "
+                        f"el paciente seleccioná '{existing.name}' en el campo 'Persona' "
+                        f"para reusar los datos sin duplicar.\n\n"
+                        f"Si es una persona distinta, verificá que el DNI esté bien escrito."
+                    ),
+                }
+            }
+
+    @api.model
+    def name_search(self, name="", domain=None, operator="ilike", limit=100):
+        """Allow searching res.partner by DNI when the term looks like one.
+
+        Lets the user type a DNI in any Many2one(res.partner) and get the match
+        without having to remember the name. Falls back to standard name_search.
+        """
+        if name:
+            cleaned = re.sub(r"[\s\.\-]", "", name)
+            if re.fullmatch(r"\d{7,8}", cleaned):
+                from odoo.fields import Domain
+                base = Domain("vat", "=", cleaned)
+                full = base & Domain(domain) if domain else base
+                results = self.search(full, limit=limit)
+                if results:
+                    return [(p.id, p.display_name) for p in results]
+        return super().name_search(name=name, domain=domain, operator=operator, limit=limit)
+
     def action_view_clinic_patients(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("clinic_core.action_clinic_patient")

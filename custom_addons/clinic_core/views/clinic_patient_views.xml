@@ -52,11 +52,11 @@
                         </div>
                         <group>
                             <group string="Identificación">
-                                <field name="partner_id" string="Persona"
+                                <field name="vat" string="DNI" placeholder="30234567 (o buscá una persona existente abajo)"/>
+                                <field name="partner_id" string="¿Ya existe esta persona?"
                                        options="{'no_create_edit': True}"
-                                       help="Si la persona ya existe (otro paciente, profesional, titular de OS), seleccionala para reusar sus datos. Si la dejás vacía y cargás el nombre arriba, se crea una nueva."/>
+                                       help="Si la persona ya existe (otro paciente, profesional, titular de OS), seleccionala acá para reusar sus datos. Podés buscarla por nombre O por DNI."/>
                                 <field name="medical_history_number" readonly="1"/>
-                                <field name="vat" string="DNI" placeholder="30234567"/>
                                 <field name="birthdate"/>
                                 <field name="age" readonly="1"/>
                                 <field name="gender"/>
