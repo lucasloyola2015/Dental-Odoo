@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ========================== List ========================== -->
+        <record id="view_clinic_appointment_list" model="ir.ui.view">
+            <field name="name">clinic.appointment.list</field>
+            <field name="model">clinic.appointment</field>
+            <field name="arch" type="xml">
+                <list string="Turnos" decoration-success="state == 'fulfilled'"
+                      decoration-info="state in ('booked', 'checked-in', 'arrived')"
+                      decoration-warning="state == 'pending'"
+                      decoration-muted="state in ('cancelled', 'noshow', 'entered-in-error')">
+                    <field name="start_datetime"/>
+                    <field name="end_datetime" optional="hide"/>
+                    <field name="duration_minutes" optional="hide"/>
+                    <field name="patient_id"/>
+                    <field name="practitioner_id"/>
+                    <field name="practice_id" optional="show"/>
+                    <field name="coverage_id" optional="show"/>
+                    <field name="is_overbooking" widget="boolean_toggle" optional="hide"/>
+                    <field name="state" widget="badge"
+                           decoration-success="state == 'fulfilled'"
+                           decoration-info="state in ('booked', 'checked-in', 'arrived')"
+                           decoration-warning="state == 'pending'"
+                           decoration-muted="state in ('cancelled', 'noshow', 'entered-in-error')"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- ========================== Form ========================== -->
+        <record id="view_clinic_appointment_form" model="ir.ui.view">
+            <field name="name">clinic.appointment.form</field>
+            <field name="model">clinic.appointment</field>
+            <field name="arch" type="xml">
+                <form string="Turno">
+                    <header>
+                        <button name="action_confirm" type="object" string="Confirmar"
+                                class="oe_highlight" invisible="state not in ('proposed', 'pending')"/>
+                        <button name="action_check_in" type="object" string="Registrar llegada"
+                                class="oe_highlight" invisible="state != 'booked'"/>
+                        <button name="action_mark_arrived" type="object" string="Pasa al consultorio"
+                                invisible="state not in ('booked', 'checked-in')"/>
+                        <button name="action_complete" type="object" string="Atendido"
+                                class="oe_highlight" invisible="state not in ('booked', 'checked-in', 'arrived')"/>
+                        <button name="action_mark_noshow" type="object" string="No asistió"
+                                invisible="state not in ('pending', 'booked', 'checked-in')"/>
+                        <button name="action_cancel" type="object" string="Cancelar"
+                                invisible="state not in ('proposed', 'pending', 'booked', 'checked-in', 'waitlist')"
+                                confirm="¿Cancelar este turno?"/>
+                        <button name="action_reset_to_pending" type="object" string="Volver a Pendiente"
+                                invisible="state in ('pending', 'proposed', 'fulfilled', 'cancelled', 'noshow', 'entered-in-error')"/>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="pending,booked,checked-in,arrived,fulfilled"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="display_name" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Quién">
+                                <field name="patient_id"/>
+                                <field name="practitioner_id"/>
+                                <field name="practice_id"/>
+                                <field name="coverage_id" options="{'no_create': True}"/>
+                                <field name="billing_route_id" options="{'no_create': True}"/>
+                            </group>
+                            <group string="Cuándo">
+                                <field name="start_datetime"/>
+                                <field name="duration_minutes"/>
+                                <field name="end_datetime" readonly="1"/>
+                                <field name="is_overbooking"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Motivo" name="reason">
+                                <field name="appointment_reason" nolabel="1" placeholder="Lo que dijo el paciente al pedir turno..."/>
+                            </page>
+                            <page string="Notas internas" name="notes">
+                                <field name="internal_notes" nolabel="1" placeholder="Notas operativas..."/>
+                            </page>
+                            <page string="Cancelación" name="cancel" invisible="state != 'cancelled'">
+                                <field name="cancellation_reason"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- ========================== Search ========================== -->
+        <record id="view_clinic_appointment_search" model="ir.ui.view">
+            <field name="name">clinic.appointment.search</field>
+            <field name="model">clinic.appointment</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="patient_id"/>
+                    <field name="practitioner_id"/>
+                    <field name="practice_id"/>
+                    <field name="state"/>
+                    <separator/>
+                    <filter name="filter_today" string="Hoy"
+                            domain="[
+                                ('start_datetime', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')),
+                                ('start_datetime', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d 00:00:00'))
+                            ]"/>
+                    <filter name="filter_this_week" string="Esta semana"
+                            domain="[
+                                ('start_datetime', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d 00:00:00')),
+                                ('start_datetime', '&lt;', (context_today() + relativedelta(days=7-context_today().weekday())).strftime('%Y-%m-%d 00:00:00'))
+                            ]"/>
+                    <filter name="filter_upcoming" string="Próximos"
+                            domain="[('start_datetime', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                    <separator/>
+                    <filter name="filter_pending" string="Pendientes" domain="[('state', '=', 'pending')]"/>
+                    <filter name="filter_booked" string="Confirmados" domain="[('state', '=', 'booked')]"/>
+                    <filter name="filter_fulfilled" string="Atendidos" domain="[('state', '=', 'fulfilled')]"/>
+                    <filter name="filter_cancelled" string="Cancelados" domain="[('state', 'in', ('cancelled', 'noshow'))]"/>
+                    <separator/>
+                    <filter name="filter_overbooking" string="Sobreturnos" domain="[('is_overbooking', '=', True)]"/>
+                    <group>
+                        <filter name="group_by_state" string="Estado" domain="[]" context="{'group_by': 'state'}"/>
+                        <filter name="group_by_practitioner" string="Profesional" domain="[]" context="{'group_by': 'practitioner_id'}"/>
+                        <filter name="group_by_patient" string="Paciente" domain="[]" context="{'group_by': 'patient_id'}"/>
+                        <filter name="group_by_date" string="Fecha" domain="[]" context="{'group_by': 'start_datetime:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ========================== Calendar ========================== -->
+        <record id="view_clinic_appointment_calendar" model="ir.ui.view">
+            <field name="name">clinic.appointment.calendar</field>
+            <field name="model">clinic.appointment</field>
+            <field name="arch" type="xml">
+                <calendar string="Agenda"
+                          date_start="start_datetime"
+                          date_stop="end_datetime"
+                          color="practitioner_id"
+                          mode="week"
+                          quick_create="0">
+                    <field name="patient_id" filters="1"/>
+                    <field name="practitioner_id" filters="1" color="practitioner_id"/>
+                    <field name="practice_id"/>
+                    <field name="state"/>
+                </calendar>
+            </field>
+        </record>
+
+        <!-- ========================== Action ========================== -->
+        <record id="action_clinic_appointment" model="ir.actions.act_window">
+            <field name="name">Turnos</field>
+            <field name="res_model">clinic.appointment</field>
+            <field name="view_mode">list,calendar,form</field>
+            <field name="search_view_id" ref="view_clinic_appointment_search"/>
+            <field name="context">{'search_default_filter_upcoming': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Agendá el primer turno.
+                </p>
+                <p>
+                    Cuando creás un turno, la duración se calcula con la cascada:
+                    profesional → especialidad → 30 min. La secretaría puede editarla.
+                    Sobreturnos: marcalos con "Sobreturno" para bypass de validaciones.
+                </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_appointment"
+            name="Turnos"
+            parent="menu_clinic_root"
+            action="action_clinic_appointment"
+            sequence="5"/>
+
+    </data>
+</odoo>

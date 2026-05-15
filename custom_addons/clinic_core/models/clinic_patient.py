@@ -52,6 +52,26 @@ class ClinicPatient(models.Model):
         inverse_name="patient_id",
         string="Coberturas (Obras sociales)",
     )
+    appointment_ids = fields.One2many(
+        comodel_name="clinic.appointment",
+        inverse_name="patient_id",
+        string="Turnos",
+    )
+    appointment_count = fields.Integer(compute="_compute_appointment_count")
+
+    @api.depends("appointment_ids")
+    def _compute_appointment_count(self):
+        for rec in self:
+            rec.appointment_count = len(rec.appointment_ids)
+
+    def action_view_appointments(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("clinic_core.action_clinic_appointment")
+        action.update({
+            "domain": [("patient_id", "=", self.id)],
+            "context": {"default_patient_id": self.id},
+        })
+        return action
 
     _hcn_unique_per_company = models.Constraint(
         "unique (medical_history_number, company_id)",

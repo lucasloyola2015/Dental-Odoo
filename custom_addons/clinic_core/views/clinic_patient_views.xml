@@ -36,6 +36,10 @@
                                     <span class="o_stat_text">de Persona</span>
                                 </div>
                             </button>
+                            <button name="action_view_appointments" type="object" class="oe_stat_button" icon="fa-calendar"
+                                    invisible="not appointment_count">
+                                <field name="appointment_count" widget="statinfo" string="Turnos"/>
+                            </button>
                         </div>
                         <div class="oe_title">
                             <label for="name"/>
