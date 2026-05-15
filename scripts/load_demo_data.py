@@ -22,29 +22,36 @@ print(f"Company: {main_company.name}")
 # =============================================================================
 print("\n[1/7] Cleaning up previous demo data...")
 
-demo_hc_numbers = [f"HC-{i:04d}" for i in range(1, 10)]
-demo_patients = env["clinic.patient"].with_context(active_test=False).search(
-    [("medical_history_number", "in", demo_hc_numbers)]
-)
-demo_partner_ids = demo_patients.partner_id.ids
-pedro = env["res.partner"].search([("vat", "=", "22567890")], limit=1)
-if pedro:
-    demo_partner_ids += pedro.ids
+# Match demo records by DNI (vat) so cleanup is robust regardless of HC format
+demo_dnis = [
+    "25123456", "30234567", "28345678", "32456789",
+    "50678901", "48789012", "8890123", "10901234", "22567890",
+]
+demo_partners = env["res.partner"].with_context(active_test=False).search([
+    ("vat", "in", demo_dnis),
+])
+demo_partner_ids = demo_partners.ids
+demo_patients = env["clinic.patient"].with_context(active_test=False).search([
+    ("partner_id", "in", demo_partner_ids),
+])
 
-if demo_patients or pedro:
+if demo_partners:
+    # 1. Appointments
     appts = env["clinic.appointment"].with_context(active_test=False).search([
         ("patient_id", "in", demo_patients.ids),
     ])
     print(f"  Deleting {len(appts)} appointments...")
     appts.unlink()
 
+    # 2. Coverages (by patient_id OR by holder_partner_id — Pedro as holder)
     coverages = env["clinic.patient.coverage"].with_context(active_test=False).search([
-        ("patient_id", "in", demo_patients.ids),
+        "|", ("patient_id", "in", demo_patients.ids),
+             ("holder_partner_id", "in", demo_partner_ids),
     ])
     print(f"  Deleting {len(coverages)} coverages...")
     coverages.unlink()
 
-    # person links: both directions (mirrors auto-deleted via unlink override)
+    # 3. Person links: both directions (mirrors auto-deleted via unlink override)
     links = env["clinic.person.link"].with_context(active_test=False).search([
         "|", ("partner_a_id", "in", demo_partner_ids),
              ("partner_b_id", "in", demo_partner_ids),
@@ -52,10 +59,17 @@ if demo_patients or pedro:
     print(f"  Deleting {len(links)} person links (mirrors cascade)...")
     links.unlink()
 
+    # 4. Patients (cascade to their partner via _inherits ondelete='cascade')
     print(f"  Deleting {len(demo_patients)} patients...")
     demo_patients.unlink()
-    if pedro:
-        pedro.unlink()
+
+    # 5. Remaining demo partners (legacy non-patient Pedro, if any)
+    remaining = env["res.partner"].search([
+        ("id", "in", demo_partner_ids),
+    ])
+    if remaining:
+        print(f"  Deleting {len(remaining)} remaining demo partners...")
+        remaining.unlink()
 
 # Cleanup practitioners + roles + practitioner-practices
 demo_employees = env["hr.employee"].with_context(active_test=False).search([
@@ -245,8 +259,10 @@ print(f"  Created {len(practitioner_practices)} practitioner-practice rows.")
 # =============================================================================
 print("\n[4/7] Creating patients + Pedro (Persona only)...")
 
-# Pedro Méndez — Persona, NO Paciente. Titular OSDE de sus hijos. Su phone es de él.
-pedro = env["res.partner"].create({
+# Pedro Méndez — ahora SÍ es Paciente también (titular OSDE de sus hijos).
+# Antes era Persona-no-Paciente; con el filtro de vínculos estricto a Pacientes,
+# debe ser Paciente para que aparezca como candidato a 'padre' de Sofía/Lucas.
+pedro_patient = env["clinic.patient"].create({
     "name": "Pedro Méndez",
     "is_clinic_person": True,
     "birthdate": date(1975, 3, 15),
@@ -254,8 +270,11 @@ pedro = env["res.partner"].create({
     "vat": "22567890",
     "phone": "+5493455555555",
     "email": "pedro.mendez@example.com",
+    "company_id": main_company.id,
+    "secretariat_notes": "Titular de OSDE de sus hijos Sofía y Lucas.",
 })
-print(f"  Created Persona (not Patient): {pedro.name}")
+pedro = pedro_patient.partner_id  # alias to keep downstream code working
+print(f"  Created Paciente (also OSDE holder): {pedro.name}")
 
 carlos = env["clinic.patient"].create({
     "name": "Carlos Pérez",

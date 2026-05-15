@@ -85,6 +85,44 @@ class HrEmployee(models.Model):
         })
         return action
 
+    def action_create_clinic_patient(self):
+        """Open or create a clinic.patient pointing to this employee's work_contact_id.
+
+        Used when a practitioner (or any employee) wants to be a patient in the
+        clinic. Avoids creating a duplicate res.partner by reusing the employee's
+        existing partner.
+        """
+        self.ensure_one()
+        if not self.work_contact_id:
+            from odoo.exceptions import UserError
+            raise UserError(_(
+                "Este empleado no tiene 'work_contact_id'. Guardá el empleado primero para que Odoo cree su partner asociado."
+            ))
+        Patient = self.env["clinic.patient"]
+        company = self.env.company
+        existing = Patient.with_context(active_test=False).search([
+            ("partner_id", "=", self.work_contact_id.id),
+            ("company_id", "=", company.id),
+        ], limit=1)
+        if existing:
+            patient = existing
+            if not patient.active:
+                patient.active = True
+        else:
+            self.work_contact_id.is_clinic_person = True
+            patient = Patient.create({
+                "partner_id": self.work_contact_id.id,
+                "company_id": company.id,
+            })
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Paciente",
+            "res_model": "clinic.patient",
+            "res_id": patient.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
     @api.onchange("specialty_main_id")
     def _onchange_specialty_main_id(self):
         if self.specialty_main_id and self.specialty_main_id not in self.specialty_ids:

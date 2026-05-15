@@ -29,7 +29,6 @@
                     <sheet>
                         <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
                         <field name="active" invisible="1"/>
-                        <field name="partner_id" invisible="1"/>
                         <div class="oe_button_box" name="button_box">
                             <button name="action_view_partner" type="object" class="oe_stat_button" icon="fa-address-card">
                                 <div class="o_stat_info">
@@ -53,6 +52,9 @@
                         </div>
                         <group>
                             <group string="Identificación">
+                                <field name="partner_id" string="Persona"
+                                       options="{'no_create_edit': True}"
+                                       help="Si la persona ya existe (otro paciente, profesional, titular de OS), seleccionala para reusar sus datos. Si la dejás vacía y cargás el nombre arriba, se crea una nueva."/>
                                 <field name="medical_history_number" readonly="1"/>
                                 <field name="vat" string="DNI" placeholder="30234567"/>
                                 <field name="birthdate"/>

@@ -57,6 +57,17 @@ class ResPartner(models.Model):
         string="Pacientes",
     )
     clinic_patient_count = fields.Integer(compute="_compute_clinic_patient_count")
+    is_clinic_patient = fields.Boolean(
+        string="Es paciente",
+        compute="_compute_is_clinic_patient",
+        store=True,
+        help="True si esta persona tiene al menos un registro como paciente activo.",
+    )
+
+    @api.depends("clinic_patient_ids", "clinic_patient_ids.active")
+    def _compute_is_clinic_patient(self):
+        for rec in self:
+            rec.is_clinic_patient = bool(rec.clinic_patient_ids.filtered("active"))
 
     # --- Human links (bidirectional: each row has a mirror) ---
     clinic_link_as_a_ids = fields.One2many(

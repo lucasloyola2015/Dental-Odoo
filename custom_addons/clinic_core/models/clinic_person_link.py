@@ -34,7 +34,7 @@ class ClinicPersonLink(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
-        domain="[('is_clinic_person', '=', True)]",
+        domain="[('is_clinic_patient', '=', True)]",
     )
     partner_b_id = fields.Many2one(
         comodel_name="res.partner",
@@ -42,7 +42,7 @@ class ClinicPersonLink(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
-        domain="[('is_clinic_person', '=', True)]",
+        domain="[('is_clinic_patient', '=', True)]",
     )
     relationship_type = fields.Selection(
         selection=[

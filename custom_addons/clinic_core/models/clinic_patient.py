@@ -89,7 +89,7 @@ class ClinicPatient(models.Model):
             contactable = rec.partner_id.clinic_link_as_b_ids.filtered(lambda l: l.can_be_contacted)
             if not contactable:
                 rec.external_contact_summary = (
-                    "⚠ Sin contactos disponibles. Cargá un vínculo en el tab 'Vínculos' "
+                    "Sin contactos disponibles. Cargá un vínculo en el tab 'Vínculos' "
                     "con la casilla 'Puede ser contactado' tildada."
                 )
                 continue
@@ -98,12 +98,12 @@ class ClinicPatient(models.Model):
                 other = link.partner_a_id
                 phone_parts = []
                 if other.phone:
-                    phone_parts.append(f"📞 {other.phone}")
+                    phone_parts.append(f"Tel: {other.phone}")
                 if other.email:
-                    phone_parts.append(f"✉ {other.email}")
-                phones = " · ".join(phone_parts) if phone_parts else "(sin canales)"
+                    phone_parts.append(f"Email: {other.email}")
+                phones = " - ".join(phone_parts) if phone_parts else "(sin canales)"
                 type_label = type_labels.get(link.relationship_type, link.relationship_type)
-                lines.append(f"• {other.name} ({type_label}): {phones}")
+                lines.append(f"- {other.name} ({type_label}): {phones}")
             rec.external_contact_summary = "\n".join(lines)
 
     @api.constrains("use_external_contact", "partner_id")

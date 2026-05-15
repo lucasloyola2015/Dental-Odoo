@@ -67,6 +67,13 @@
                             invisible="not is_clinic_practitioner or not appointment_count">
                         <field name="appointment_count" widget="statinfo" string="Turnos"/>
                     </button>
+                    <button name="action_create_clinic_patient" type="object" class="oe_stat_button" icon="fa-medkit"
+                            invisible="not is_clinic_practitioner">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Crear /</span>
+                            <span class="o_stat_text">ver como Paciente</span>
+                        </div>
+                    </button>
                 </xpath>
             </field>
         </record>
