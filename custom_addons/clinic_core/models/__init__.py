@@ -17,3 +17,4 @@ from . import clinic_practice_code_os
 from . import clinic_practitioner_role
 from . import clinic_practitioner_practice
 from . import clinic_appointment
+from . import clinic_dashboard

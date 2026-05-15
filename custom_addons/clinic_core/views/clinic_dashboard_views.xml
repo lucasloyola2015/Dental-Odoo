@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ============================================================ -->
+        <!-- Dashboard form view                                          -->
+        <!-- ============================================================ -->
+        <record id="view_clinic_dashboard_form" model="ir.ui.view">
+            <field name="name">clinic.dashboard.form</field>
+            <field name="model">clinic.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Dashboard Clínica" create="false" edit="false" delete="false">
+                    <sheet>
+
+                        <!-- ====================================== -->
+                        <!-- 1. ACCIONES RÁPIDAS                    -->
+                        <!-- ====================================== -->
+                        <div class="oe_title mb-3">
+                            <h1>Dashboard de la Secretaría</h1>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <button name="action_new_appointment" type="object"
+                                    string="+ Nuevo turno"
+                                    class="btn btn-primary"/>
+                            <button name="action_new_patient" type="object"
+                                    string="+ Nuevo paciente"
+                                    class="btn btn-secondary"/>
+                            <button name="action_search_patient" type="object"
+                                    string="🔍 Buscar paciente"
+                                    class="btn btn-secondary"/>
+                            <button name="action_full_agenda" type="object"
+                                    string="📅 Agenda completa"
+                                    class="btn btn-secondary"/>
+                        </div>
+
+                        <!-- ====================================== -->
+                        <!-- 2. KPIs (cards con click-through)      -->
+                        <!-- ====================================== -->
+                        <div class="o_horizontal_separator mb-2">KPIs</div>
+                        <div class="o_setting_box mb-4">
+                            <div class="d-flex flex-wrap gap-3">
+                                <button name="action_open_today" type="object"
+                                        class="oe_stat_button border rounded p-3" icon="fa-calendar">
+                                    <field name="appointments_today_count" widget="statinfo" string="Turnos hoy"/>
+                                </button>
+                                <button name="action_open_pending" type="object"
+                                        class="oe_stat_button border rounded p-3" icon="fa-clock-o">
+                                    <field name="appointments_pending_count" widget="statinfo" string="Sin confirmar"/>
+                                </button>
+                                <button name="action_open_week" type="object"
+                                        class="oe_stat_button border rounded p-3" icon="fa-calendar-plus-o">
+                                    <field name="appointments_week_count" widget="statinfo" string="Próx. 7 días"/>
+                                </button>
+                                <button name="action_open_new_patients" type="object"
+                                        class="oe_stat_button border rounded p-3" icon="fa-user-plus">
+                                    <field name="new_patients_month_count" widget="statinfo" string="Nuevos pac. (30d)"/>
+                                </button>
+                                <button name="action_open_noshows" type="object"
+                                        class="oe_stat_button border rounded p-3" icon="fa-user-times">
+                                    <field name="noshows_30d_count" widget="statinfo" string="No-shows (30d)"/>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ====================================== -->
+                        <!-- 3. AGENDA DE HOY                       -->
+                        <!-- ====================================== -->
+                        <div class="o_horizontal_separator mb-2">Agenda de hoy</div>
+                        <field name="today_appointment_ids" nolabel="1" readonly="1">
+                            <list create="false" delete="false" edit="false"
+                                  decoration-success="state == 'fulfilled'"
+                                  decoration-info="state in ('booked', 'checked-in', 'arrived')"
+                                  decoration-warning="state == 'pending'"
+                                  decoration-muted="state in ('cancelled', 'noshow', 'entered-in-error')">
+                                <field name="start_datetime" widget="datetime" string="Hora"/>
+                                <field name="duration_minutes" string="Min"/>
+                                <field name="patient_id"/>
+                                <field name="practitioner_id"/>
+                                <field name="practice_id"/>
+                                <field name="coverage_id" optional="show"/>
+                                <field name="state" widget="badge"
+                                       decoration-success="state == 'fulfilled'"
+                                       decoration-info="state in ('booked', 'checked-in', 'arrived')"
+                                       decoration-warning="state == 'pending'"
+                                       decoration-muted="state in ('cancelled', 'noshow')"/>
+                            </list>
+                        </field>
+
+                        <!-- ====================================== -->
+                        <!-- 4. PENDIENTES DE CONFIRMACIÓN          -->
+                        <!-- ====================================== -->
+                        <div class="o_horizontal_separator mb-2 mt-4">Próximos pendientes de confirmar (7 días)</div>
+                        <field name="pending_appointment_ids" nolabel="1" readonly="1">
+                            <list create="false" delete="false" edit="false">
+                                <field name="start_datetime" widget="datetime" string="Cuándo"/>
+                                <field name="patient_id"/>
+                                <field name="practitioner_id"/>
+                                <field name="practice_id" optional="show"/>
+                                <field name="coverage_id" optional="hide"/>
+                            </list>
+                        </field>
+
+                        <!-- ====================================== -->
+                        <!-- 5. GRÁFICOS                            -->
+                        <!-- ====================================== -->
+                        <div class="o_horizontal_separator mb-2 mt-4">Análisis (últimos 30 días)</div>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button name="action_chart_by_state" type="object"
+                                    string="📊 Por estado" class="btn btn-outline-primary"/>
+                            <button name="action_chart_by_day" type="object"
+                                    string="📊 Por día" class="btn btn-outline-primary"/>
+                            <button name="action_chart_by_practitioner" type="object"
+                                    string="📊 Por profesional" class="btn btn-outline-primary"/>
+                            <button name="action_chart_by_insurance" type="object"
+                                    string="📊 Por obra social" class="btn btn-outline-primary"/>
+                        </div>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Action to open the dashboard                                 -->
+        <!-- ============================================================ -->
+        <record id="action_clinic_dashboard" model="ir.actions.server">
+            <field name="name">Dashboard Clínica</field>
+            <field name="model_id" ref="model_clinic_dashboard"/>
+            <field name="state">code</field>
+            <field name="code">action = model.action_open_dashboard()</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Menu (first item, before Turnos)                             -->
+        <!-- ============================================================ -->
+        <menuitem
+            id="menu_clinic_dashboard"
+            name="Dashboard"
+            parent="menu_clinic_root"
+            action="action_clinic_dashboard"
+            sequence="1"/>
+
+    </data>
+</odoo>
