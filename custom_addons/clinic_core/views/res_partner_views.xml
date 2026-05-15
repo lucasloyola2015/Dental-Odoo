@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_res_partner_form_clinic" model="ir.ui.view">
+            <field name="name">res.partner.form.clinic</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='function']" position="after">
+                    <field name="is_clinic_person" invisible="is_company"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Datos clínicos" name="clinic" invisible="not is_clinic_person">
+                        <group>
+                            <group>
+                                <field name="birthdate"/>
+                                <field name="gender"/>
+                            </group>
+                        </group>
+                        <field name="clinic_observations" placeholder="Notas relevantes para la atención..."/>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ============================================================ -->
+        <!-- ODONTOLOGÍA + sub-especialidades                              -->
+        <!-- ============================================================ -->
+
+        <record id="specialty_odontologia" model="clinic.specialty">
+            <field name="code">ODONTO</field>
+            <field name="name">Odontología</field>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_odontopediatria" model="clinic.specialty">
+            <field name="code">ODONTO_PED</field>
+            <field name="name">Odontopediatría</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_ortodoncia" model="clinic.specialty">
+            <field name="code">ORTO</field>
+            <field name="name">Ortodoncia</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_endodoncia" model="clinic.specialty">
+            <field name="code">ENDO</field>
+            <field name="name">Endodoncia</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">60</field>
+        </record>
+
+        <record id="specialty_periodoncia" model="clinic.specialty">
+            <field name="code">PERIO</field>
+            <field name="name">Periodoncia</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">45</field>
+        </record>
+
+        <record id="specialty_cirugia_oral" model="clinic.specialty">
+            <field name="code">CIRUG_ORAL</field>
+            <field name="name">Cirugía oral y maxilofacial</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">60</field>
+        </record>
+
+        <record id="specialty_implantologia" model="clinic.specialty">
+            <field name="code">IMPLANT</field>
+            <field name="name">Implantología</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">60</field>
+        </record>
+
+        <record id="specialty_protesis" model="clinic.specialty">
+            <field name="code">PROT</field>
+            <field name="name">Prótesis dental</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">45</field>
+        </record>
+
+        <record id="specialty_estetica" model="clinic.specialty">
+            <field name="code">ESTET</field>
+            <field name="name">Odontología estética</field>
+            <field name="parent_id" ref="specialty_odontologia"/>
+            <field name="default_appointment_duration_minutes">45</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- CARDIOLOGÍA + sub-especialidades                              -->
+        <!-- ============================================================ -->
+
+        <record id="specialty_cardiologia" model="clinic.specialty">
+            <field name="code">CARDIO</field>
+            <field name="name">Cardiología</field>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_cardio_clinica" model="clinic.specialty">
+            <field name="code">CARDIO_CLIN</field>
+            <field name="name">Cardiología clínica</field>
+            <field name="parent_id" ref="specialty_cardiologia"/>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_cardio_pediatrica" model="clinic.specialty">
+            <field name="code">CARDIO_PED</field>
+            <field name="name">Cardiología pediátrica</field>
+            <field name="parent_id" ref="specialty_cardiologia"/>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_hemodinamia" model="clinic.specialty">
+            <field name="code">HEMOD</field>
+            <field name="name">Hemodinamia</field>
+            <field name="parent_id" ref="specialty_cardiologia"/>
+            <field name="default_appointment_duration_minutes">90</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PEDIATRÍA + sub-especialidades                                -->
+        <!-- ============================================================ -->
+
+        <record id="specialty_pediatria" model="clinic.specialty">
+            <field name="code">PEDIAT</field>
+            <field name="name">Pediatría</field>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <record id="specialty_neonatologia" model="clinic.specialty">
+            <field name="code">NEONAT</field>
+            <field name="name">Neonatología</field>
+            <field name="parent_id" ref="specialty_pediatria"/>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- CLÍNICA MÉDICA (sin sub-especialidades por ahora)             -->
+        <!-- ============================================================ -->
+
+        <record id="specialty_clinica_medica" model="clinic.specialty">
+            <field name="code">CLIN_MED</field>
+            <field name="name">Clínica Médica</field>
+            <field name="default_appointment_duration_minutes">30</field>
+        </record>
+
+    </data>
+</odoo>

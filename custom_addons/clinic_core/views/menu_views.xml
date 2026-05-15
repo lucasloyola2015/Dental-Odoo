@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <menuitem
+            id="menu_clinic_root"
+            name="Clínica"
+            sequence="25"
+            groups="clinic_core.group_clinic_secretariat"/>
+
+        <menuitem
+            id="menu_clinic_configuration"
+            name="Configuración"
+            parent="menu_clinic_root"
+            sequence="100"
+            groups="clinic_core.group_clinic_admin"/>
+
+    </data>
+</odoo>

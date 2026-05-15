@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Module category (used by privilege grouping in the Users settings UI) -->
+    <record id="module_category_clinic" model="ir.module.category">
+        <field name="name">Clínica</field>
+        <field name="description">Acceso al módulo de gestión clínica.</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <!-- Privilege: groups the clinic access levels under one heading -->
+    <record id="res_groups_privilege_clinic" model="res.groups.privilege">
+        <field name="name">Clínica</field>
+        <field name="sequence">25</field>
+        <field name="category_id" ref="module_category_clinic"/>
+    </record>
+
+    <!-- Groups -->
+    <record id="group_clinic_secretariat" model="res.groups">
+        <field name="name">Secretaría</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_clinic"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Personal de secretaría: gestiona pacientes, turnos, conversaciones.</field>
+    </record>
+
+    <record id="group_clinic_admin" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_clinic"/>
+        <field name="implied_ids" eval="[(4, ref('group_clinic_secretariat'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="comment">Acceso administrativo total al módulo de clínica.</field>
+    </record>
+
+</odoo>
