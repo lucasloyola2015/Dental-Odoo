@@ -67,27 +67,34 @@ class ClinicPatient(models.Model):
         compute="_compute_external_contact_summary",
     )
 
-    @api.depends("partner_id", "use_external_contact")
+    @api.depends(
+        "use_external_contact",
+        "partner_id",
+        "partner_id.clinic_link_as_b_ids",
+        "partner_id.clinic_link_as_b_ids.can_be_contacted",
+        "partner_id.clinic_link_as_b_ids.relationship_type",
+        "partner_id.clinic_link_as_b_ids.partner_a_id",
+        "partner_id.clinic_link_as_b_ids.partner_a_id.name",
+        "partner_id.clinic_link_as_b_ids.partner_a_id.phone",
+        "partner_id.clinic_link_as_b_ids.partner_a_id.email",
+    )
     def _compute_external_contact_summary(self):
         Link = self.env["clinic.person.link"]
+        type_labels = dict(Link._fields["relationship_type"].selection)
         for rec in self:
             if not rec.use_external_contact or not rec.partner_id:
                 rec.external_contact_summary = False
                 continue
-            # Find links where this partner is partner_b (someone else has can_be_contacted over them)
-            links = Link.search([
-                ("partner_b_id", "=", rec.partner_id.id),
-                ("can_be_contacted", "=", True),
-            ])
-            if not links:
+            # Use the in-memory One2many of the partner so unsaved changes are visible
+            contactable = rec.partner_id.clinic_link_as_b_ids.filtered(lambda l: l.can_be_contacted)
+            if not contactable:
                 rec.external_contact_summary = (
                     "⚠ Sin contactos disponibles. Cargá un vínculo en el tab 'Vínculos' "
                     "con la casilla 'Puede ser contactado' tildada."
                 )
                 continue
-            type_labels = dict(Link._fields["relationship_type"].selection)
             lines = []
-            for link in links:
+            for link in contactable:
                 other = link.partner_a_id
                 phone_parts = []
                 if other.phone:
@@ -101,14 +108,13 @@ class ClinicPatient(models.Model):
 
     @api.constrains("use_external_contact", "partner_id")
     def _check_contact_target(self):
-        Link = self.env["clinic.person.link"]
         for rec in self:
             if rec.use_external_contact:
-                count = Link.search_count([
-                    ("partner_b_id", "=", rec.partner_id.id),
-                    ("can_be_contacted", "=", True),
-                ])
-                if not count:
+                # Use in-memory One2many so it works during create with embedded links
+                has_external = any(
+                    l.can_be_contacted for l in rec.partner_id.clinic_link_as_b_ids
+                )
+                if not has_external:
                     raise ValidationError(_(
                         "El paciente está marcado como 'Contacto externo' pero no tiene ningún vínculo "
                         "con 'Puede ser contactado' tildado. Cargá uno en el tab 'Vínculos'."
