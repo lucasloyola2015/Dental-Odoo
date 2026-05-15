@@ -11,6 +11,7 @@
                     <field name="name"/>
                     <field name="vat" string="DNI"/>
                     <field name="birthdate"/>
+                    <field name="age" optional="show"/>
                     <field name="phone" optional="show"/>
                     <field name="email" optional="hide"/>
                     <field name="start_date" string="Paciente desde" optional="hide"/>
@@ -55,6 +56,7 @@
                                 <field name="medical_history_number" readonly="1"/>
                                 <field name="vat" string="DNI" placeholder="30234567"/>
                                 <field name="birthdate"/>
+                                <field name="age" readonly="1"/>
                                 <field name="gender"/>
                             </group>
                             <group string="Contacto">

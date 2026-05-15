@@ -32,6 +32,23 @@ class ResPartner(models.Model):
         string="Observaciones",
         help="Texto libre con información relevante para la atención. Lo lee el equipo clínico.",
     )
+    age = fields.Integer(
+        string="Edad",
+        compute="_compute_age",
+        help="Calculada a partir de la fecha de nacimiento. No se persiste — se recalcula en cada lectura.",
+    )
+
+    @api.depends("birthdate")
+    def _compute_age(self):
+        today = fields.Date.context_today(self)
+        for rec in self:
+            if not rec.birthdate:
+                rec.age = 0
+                continue
+            age = today.year - rec.birthdate.year
+            if (today.month, today.day) < (rec.birthdate.month, rec.birthdate.day):
+                age -= 1
+            rec.age = age
 
     # --- Patients (relations via _inherits) ---
     clinic_patient_ids = fields.One2many(

@@ -29,6 +29,7 @@
                         <group>
                             <group>
                                 <field name="birthdate"/>
+                                <field name="age" readonly="1"/>
                                 <field name="gender"/>
                             </group>
                         </group>
