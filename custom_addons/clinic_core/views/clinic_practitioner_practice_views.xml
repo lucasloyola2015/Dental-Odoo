@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_practitioner_practice_list" model="ir.ui.view">
+            <field name="name">clinic.practitioner.practice.list</field>
+            <field name="model">clinic.practitioner.practice</field>
+            <field name="arch" type="xml">
+                <list string="Prácticas por profesional" multi_edit="1">
+                    <field name="employee_id"/>
+                    <field name="practice_id"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="can_perform" widget="boolean_toggle"/>
+                    <field name="default_duration_minutes"/>
+                    <field name="price_particular"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_practitioner_practice_form" model="ir.ui.view">
+            <field name="name">clinic.practitioner.practice.form</field>
+            <field name="model">clinic.practitioner.practice</field>
+            <field name="arch" type="xml">
+                <form string="Práctica por profesional">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" options="{'no_create': True}"/>
+                                <field name="practice_id" options="{'no_create': True}"/>
+                                <field name="company_id" options="{'no_create': True}"/>
+                            </group>
+                            <group>
+                                <field name="can_perform"/>
+                                <field name="default_duration_minutes"/>
+                                <field name="price_particular"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        <field name="notes" placeholder="Notas..."/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_practitioner_practice_search" model="ir.ui.view">
+            <field name="name">clinic.practitioner.practice.search</field>
+            <field name="model">clinic.practitioner.practice</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="employee_id"/>
+                    <field name="practice_id"/>
+                    <separator/>
+                    <filter name="filter_can_perform" string="Realiza" domain="[('can_perform', '=', True)]"/>
+                    <filter name="filter_archived" string="Archivados" domain="[('active', '=', False)]"/>
+                    <group>
+                        <filter name="group_by_employee" string="Profesional" domain="[]" context="{'group_by': 'employee_id'}"/>
+                        <filter name="group_by_practice" string="Práctica" domain="[]" context="{'group_by': 'practice_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_practitioner_practice" model="ir.actions.act_window">
+            <field name="name">Prácticas por profesional</field>
+            <field name="res_model">clinic.practitioner.practice</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_practitioner_practice_search"/>
+        </record>
+
+        <menuitem
+            id="menu_clinic_practitioner_practice"
+            name="Prácticas por profesional"
+            parent="menu_clinic_configuration"
+            action="action_clinic_practitioner_practice"
+            sequence="110"/>
+
+    </data>
+</odoo>

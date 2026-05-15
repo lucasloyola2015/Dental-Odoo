@@ -1,4 +1,5 @@
 from . import res_partner
+from . import hr_employee
 from . import clinic_specialty
 from . import clinic_patient
 from . import clinic_contact
@@ -13,3 +14,5 @@ from . import clinic_tariff
 from . import clinic_bond_system
 from . import clinic_copayment
 from . import clinic_practice_code_os
+from . import clinic_practitioner_role
+from . import clinic_practitioner_practice

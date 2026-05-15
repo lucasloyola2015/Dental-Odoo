@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Add clinical fields to hr.employee form -->
+        <record id="view_hr_employee_form_clinic" model="ir.ui.view">
+            <field name="name">hr.employee.form.clinic</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Datos clínicos" name="clinic" invisible="not is_clinic_practitioner" groups="clinic_core.group_clinic_secretariat">
+                        <group>
+                            <group string="Profesión">
+                                <field name="is_clinic_practitioner"/>
+                                <field name="medical_license"/>
+                                <field name="specialty_main_id"/>
+                                <field name="specialty_ids" widget="many2many_tags"/>
+                            </group>
+                            <group string="Agendamiento">
+                                <field name="default_appointment_duration_minutes" help="Vacío = usa la cascada"/>
+                                <field name="slots_buffer_post_minutes"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Roles por clínica" name="roles">
+                                <field name="practitioner_role_ids" context="{'default_employee_id': id}">
+                                    <list editable="bottom">
+                                        <field name="company_id" options="{'no_create': True}"/>
+                                        <field name="resource_calendar_id" options="{'no_create': True}"/>
+                                        <field name="accepted_insurance_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                        <field name="billing_route_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                        <field name="calendar_color" widget="color" optional="hide"/>
+                                        <field name="gcal_calendar_id" optional="hide"/>
+                                        <field name="valid_from" optional="hide"/>
+                                        <field name="valid_to" optional="hide"/>
+                                        <field name="active" widget="boolean_toggle"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Prácticas que realiza" name="practices">
+                                <field name="practitioner_practice_ids" context="{'default_employee_id': id}">
+                                    <list editable="bottom">
+                                        <field name="practice_id" options="{'no_create': True}"/>
+                                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                        <field name="can_perform" widget="boolean_toggle"/>
+                                        <field name="default_duration_minutes" string="Duración (min)"/>
+                                        <field name="price_particular" string="Precio particular ($)"/>
+                                        <field name="active" widget="boolean_toggle"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Observaciones clínicas" name="clinic_obs">
+                                <field name="clinic_observations" nolabel="1" placeholder="Particularidades del profesional..."/>
+                            </page>
+                        </notebook>
+                    </page>
+                </xpath>
+                <!-- Also expose the flag at the top so it's visible without entering the tab -->
+                <xpath expr="//field[@name='job_title']" position="after">
+                    <field name="is_clinic_practitioner"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Filtered action: only clinic practitioners -->
+        <record id="action_clinic_practitioner" model="ir.actions.act_window">
+            <field name="name">Profesionales</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="domain">[('is_clinic_practitioner', '=', True)]</field>
+            <field name="context">{'default_is_clinic_practitioner': True}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Cargá el primer profesional de la clínica.
+                </p>
+                <p>
+                    Un profesional clínico se modela como empleado (hr.employee) con datos clínicos:
+                    matrícula, especialidades, duración default, prácticas que realiza y un rol por cada
+                    compañía donde atiende (con horario laboral y obras sociales habilitadas).
+                </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_practitioner"
+            name="Profesionales"
+            parent="menu_clinic_root"
+            action="action_clinic_practitioner"
+            sequence="15"/>
+
+    </data>
+</odoo>
