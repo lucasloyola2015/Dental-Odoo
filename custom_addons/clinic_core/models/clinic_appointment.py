@@ -124,6 +124,84 @@ class ClinicAppointment(models.Model):
     cancellation_reason = fields.Char(string="Motivo de cancelación", tracking=True)
 
     # -------------------------------------------------------------------------
+    # Valuation (tentative — see doc 05 §3.1)
+    # -------------------------------------------------------------------------
+    currency_id = fields.Many2one(
+        comodel_name="res.currency",
+        related="company_id.currency_id",
+        store=True,
+    )
+    amount_paid_by_os = fields.Monetary(
+        string="Paga OS ($)",
+        currency_field="currency_id",
+        compute="_compute_valuation",
+        store=True,
+        help="Lo que paga la obra social al profesional/asociación según tarifa vigente.",
+    )
+    bond_count_paid_by_os = fields.Integer(
+        string="Bonos OS",
+        compute="_compute_valuation",
+        store=True,
+        help="Cantidad de bonos que cubre la OS (sistemas tipo IAPOS).",
+    )
+    bond_value_amount = fields.Monetary(
+        string="Valor bonos ($)",
+        currency_field="currency_id",
+        compute="_compute_valuation",
+        store=True,
+        help="bond_count_paid_by_os × valor unitario del bono vigente.",
+    )
+    copayment_amount = fields.Monetary(
+        string="Copago OS ($)",
+        currency_field="currency_id",
+        compute="_compute_valuation",
+        store=True,
+        help="Lo que el paciente paga además, según la OS.",
+    )
+    professional_extra_override = fields.Monetary(
+        string="Adicional profesional ($)",
+        currency_field="currency_id",
+        help="Override manual del extra que cobra el profesional. Dejá vacío para usar el cálculo automático.",
+    )
+    professional_extra_auto = fields.Monetary(
+        string="Adicional profesional (auto)",
+        currency_field="currency_id",
+        compute="_compute_valuation",
+        store=True,
+        help="Calculado: precio particular para PARTICULAR, 0 para con cobertura.",
+    )
+    professional_extra_final = fields.Monetary(
+        string="Adicional prof. aplicado",
+        currency_field="currency_id",
+        compute="_compute_valuation",
+        store=True,
+    )
+    clinic_extra = fields.Monetary(
+        string="Adicional clínica ($)",
+        currency_field="currency_id",
+        default=0.0,
+        help="Adicional cobrado por la clínica. V1: editable, default 0. V2: configurable por clínica.",
+    )
+    total_for_patient = fields.Monetary(
+        string="Total a cobrar al paciente ($)",
+        currency_field="currency_id",
+        compute="_compute_valuation",
+        store=True,
+    )
+    valuation_note = fields.Text(
+        string="Detalle del cálculo",
+        compute="_compute_valuation",
+        store=True,
+    )
+    tariff_id = fields.Many2one(
+        comodel_name="clinic.tariff",
+        string="Tarifa aplicada",
+        compute="_compute_valuation",
+        store=True,
+        help="Tarifa OS-vía-práctica usada para el cálculo (la más reciente vigente).",
+    )
+
+    # -------------------------------------------------------------------------
     # Display
     # -------------------------------------------------------------------------
     display_name = fields.Char(compute="_compute_display_name", store=True)
@@ -143,6 +221,148 @@ class ClinicAppointment(models.Model):
                 rec.end_datetime = rec.start_datetime + timedelta(minutes=rec.duration_minutes)
             else:
                 rec.end_datetime = False
+
+    @api.depends(
+        "patient_id", "practitioner_id", "practice_id", "coverage_id",
+        "billing_route_id", "company_id", "start_datetime",
+        "professional_extra_override", "clinic_extra",
+    )
+    def _compute_valuation(self):
+        """Tentative valuation following doc 05 §3.1, V1-simplified.
+
+        Particular:
+            - amount_paid_by_os = 0, copayment = 0
+            - professional_extra_auto = practitioner.practice.price_particular for this practice
+            - total = (override or auto) + clinic_extra
+
+        With coverage:
+            - Find tariff (insurance + route + practice, vigente al start_datetime)
+            - amount_paid_by_os from tariff
+            - bond_count + bond_value from clinic.bond.system if tariff uses bonds
+            - copayment from clinic.copayment (most specific: by practice, fallback to insurance-only)
+            - professional_extra_auto = 0 (V1 — no adicional default with OS)
+            - clinic_extra = field value (editable)
+            - total = copayment + professional_extra_final + clinic_extra
+        """
+        Tariff = self.env["clinic.tariff"]
+        Copay = self.env["clinic.copayment"]
+        BondSys = self.env["clinic.bond.system"]
+        PractPractice = self.env["clinic.practitioner.practice"]
+
+        for rec in self:
+            # Reset
+            rec.amount_paid_by_os = 0.0
+            rec.bond_count_paid_by_os = 0
+            rec.bond_value_amount = 0.0
+            rec.copayment_amount = 0.0
+            rec.professional_extra_auto = 0.0
+            rec.professional_extra_final = 0.0
+            rec.total_for_patient = 0.0
+            rec.valuation_note = ""
+            rec.tariff_id = False
+
+            if not rec.practice_id:
+                rec.valuation_note = "Sin práctica definida — no se puede calcular presupuesto."
+                continue
+
+            ref_date = (rec.start_datetime or fields.Datetime.now()).date() if rec.start_datetime else fields.Date.today()
+            is_particular = (not rec.coverage_id) or rec.coverage_id.health_insurance_id.is_particular
+
+            notes = []
+
+            # ----------------------------- Particular -----------------------------
+            if is_particular:
+                pp = PractPractice.search([
+                    ("employee_id", "=", rec.practitioner_id.id),
+                    ("practice_id", "=", rec.practice_id.id),
+                    ("company_id", "=", rec.company_id.id),
+                    ("can_perform", "=", True),
+                ], limit=1)
+                if pp and pp.price_particular:
+                    rec.professional_extra_auto = pp.price_particular
+                    notes.append(f"Particular. Precio del profesional: ${pp.price_particular:,.2f}")
+                else:
+                    notes.append("Particular. El profesional no tiene precio cargado para esta práctica.")
+
+                rec.professional_extra_final = rec.professional_extra_override or rec.professional_extra_auto
+                rec.total_for_patient = rec.professional_extra_final + (rec.clinic_extra or 0.0)
+                if rec.professional_extra_override:
+                    notes.append(f"Adicional profesional override: ${rec.professional_extra_override:,.2f}")
+                if rec.clinic_extra:
+                    notes.append(f"Adicional clínica: ${rec.clinic_extra:,.2f}")
+                notes.append(f"TOTAL a cobrar: ${rec.total_for_patient:,.2f} (tentativo)")
+                rec.valuation_note = "\n".join(notes)
+                continue
+
+            # --------------------------- With coverage ---------------------------
+            insurance = rec.coverage_id.health_insurance_id
+            route = rec.billing_route_id
+
+            # Find tariff: most recent vigente <= ref_date
+            tariff_domain = [
+                ("health_insurance_id", "=", insurance.id),
+                ("practice_id", "=", rec.practice_id.id),
+                ("valid_from", "<=", ref_date),
+                ("company_id", "in", (False, rec.company_id.id)),
+            ]
+            if route:
+                tariff_domain.append(("billing_route_id", "=", route.id))
+            tariff = Tariff.search(tariff_domain, order="valid_from desc", limit=1)
+            if tariff:
+                rec.tariff_id = tariff.id
+                if tariff.amount_paid_by_os:
+                    rec.amount_paid_by_os = tariff.amount_paid_by_os
+                    notes.append(f"{insurance.code} paga al profesional: ${tariff.amount_paid_by_os:,.2f} (tarifa {tariff.valid_from})")
+                elif tariff.bond_count:
+                    rec.bond_count_paid_by_os = tariff.bond_count
+                    bond_sys = BondSys.search([
+                        ("health_insurance_id", "=", insurance.id),
+                        ("valid_from", "<=", ref_date),
+                        "|", ("billing_route_id", "=", False), ("billing_route_id", "=", route.id if route else 0),
+                        ("active", "=", True),
+                    ], order="valid_from desc", limit=1)
+                    if bond_sys:
+                        rec.bond_value_amount = tariff.bond_count * bond_sys.bond_value
+                        notes.append(
+                            f"{insurance.code} paga {tariff.bond_count} bonos × ${bond_sys.bond_value:,.2f} = ${rec.bond_value_amount:,.2f}"
+                        )
+                    else:
+                        notes.append(f"{insurance.code} paga {tariff.bond_count} bonos (valor del bono no configurado).")
+                if tariff.has_stamp and tariff.stamp_value:
+                    notes.append(f"+ estampilla ${tariff.stamp_value:,.2f}")
+            else:
+                notes.append(f"⚠ Sin tarifa cargada para {insurance.code} / {rec.practice_id.faco_code} al {ref_date}.")
+
+            # Find copayment: most specific (by practice) → fallback to insurance-only
+            copay = Copay.search([
+                ("health_insurance_id", "=", insurance.id),
+                ("practice_id", "=", rec.practice_id.id),
+                ("valid_from", "<=", ref_date),
+                ("company_id", "in", (False, rec.company_id.id)),
+            ], order="valid_from desc", limit=1)
+            if not copay:
+                copay = Copay.search([
+                    ("health_insurance_id", "=", insurance.id),
+                    ("practice_id", "=", False),
+                    ("valid_from", "<=", ref_date),
+                    ("company_id", "in", (False, rec.company_id.id)),
+                ], order="valid_from desc", limit=1)
+            if copay:
+                rec.copayment_amount = copay.amount
+                notes.append(f"Copago paciente: ${copay.amount:,.2f}")
+
+            # Professional extra: 0 by default with OS, override manual
+            rec.professional_extra_auto = 0.0
+            rec.professional_extra_final = rec.professional_extra_override or 0.0
+            if rec.professional_extra_override:
+                notes.append(f"Adicional profesional (manual): ${rec.professional_extra_override:,.2f}")
+
+            if rec.clinic_extra:
+                notes.append(f"Adicional clínica: ${rec.clinic_extra:,.2f}")
+
+            rec.total_for_patient = (rec.copayment_amount or 0.0) + (rec.professional_extra_final or 0.0) + (rec.clinic_extra or 0.0)
+            notes.append(f"TOTAL a cobrar al paciente: ${rec.total_for_patient:,.2f} (tentativo, sujeto a tarifario vigente al día de la atención)")
+            rec.valuation_note = "\n".join(notes)
 
     @api.depends("patient_id.name", "practitioner_id.name", "start_datetime", "state")
     def _compute_display_name(self):

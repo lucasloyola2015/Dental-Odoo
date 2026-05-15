@@ -24,6 +24,8 @@
                            decoration-info="state in ('booked', 'checked-in', 'arrived')"
                            decoration-warning="state == 'pending'"
                            decoration-muted="state in ('cancelled', 'noshow', 'entered-in-error')"/>
+                    <field name="total_for_patient" widget="monetary" optional="show" sum="Total tentativo"/>
+                    <field name="currency_id" column_invisible="True"/>
                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                 </list>
             </field>
@@ -79,6 +81,30 @@
                         <notebook>
                             <page string="Motivo" name="reason">
                                 <field name="appointment_reason" nolabel="1" placeholder="Lo que dijo el paciente al pedir turno..."/>
+                            </page>
+                            <page string="Presupuesto" name="valuation">
+                                <field name="currency_id" invisible="1"/>
+                                <group>
+                                    <group string="Lo que paga la OS">
+                                        <field name="amount_paid_by_os" widget="monetary"/>
+                                        <field name="bond_count_paid_by_os" invisible="not bond_count_paid_by_os"/>
+                                        <field name="bond_value_amount" widget="monetary" invisible="not bond_count_paid_by_os"/>
+                                        <field name="tariff_id" readonly="1" invisible="not tariff_id"/>
+                                    </group>
+                                    <group string="Lo que paga el paciente">
+                                        <field name="copayment_amount" widget="monetary"/>
+                                        <field name="professional_extra_auto" widget="monetary" readonly="1"/>
+                                        <field name="professional_extra_override" widget="monetary"/>
+                                        <field name="professional_extra_final" widget="monetary" readonly="1"/>
+                                        <field name="clinic_extra" widget="monetary"/>
+                                        <field name="total_for_patient" widget="monetary" class="oe_subtotal_footer_separator"/>
+                                    </group>
+                                </group>
+                                <div class="alert alert-warning mt-2" role="alert">
+                                    <strong>Presupuesto tentativo.</strong> Se recalcula al cambiar paciente, profesional, práctica o cobertura. El valor final puede variar según el tarifario vigente al día de la atención.
+                                </div>
+                                <separator string="Detalle del cálculo"/>
+                                <field name="valuation_note" nolabel="1" readonly="1" widget="text"/>
                             </page>
                             <page string="Notas internas" name="notes">
                                 <field name="internal_notes" nolabel="1" placeholder="Notas operativas..."/>
