@@ -18,6 +18,11 @@ INVERSE_TYPE = {
     "other": "other",
 }
 
+# Relationship types where A must be older than B (born earlier).
+# child/grandchild are the inverse and handled by checking the opposite.
+A_OLDER_THAN_B = {"parent", "grandparent"}
+A_YOUNGER_THAN_B = {"child", "grandchild"}
+
 # Fields that are synced between original and mirror (semantic equality)
 _SYNC_FIELDS = ("valid_from", "valid_to", "notes")
 
@@ -119,6 +124,39 @@ class ClinicPersonLink(models.Model):
         for rec in self:
             if rec.valid_to and rec.valid_from and rec.valid_to < rec.valid_from:
                 raise ValidationError(_("Vigente hasta no puede ser anterior a Vigente desde."))
+
+    @api.constrains("partner_a_id", "partner_b_id", "relationship_type")
+    def _check_generational_age(self):
+        """A 'parent' must be older than the 'child' (and similar generational links).
+
+        Skips when either birthdate is missing (can't validate).
+        """
+        type_labels = dict(self._fields["relationship_type"].selection)
+        for rec in self:
+            a_birth = rec.partner_a_id.birthdate
+            b_birth = rec.partner_b_id.birthdate
+            if not a_birth or not b_birth:
+                continue
+            rtype = rec.relationship_type
+            label = type_labels.get(rtype, rtype)
+            if rtype in A_OLDER_THAN_B and a_birth >= b_birth:
+                raise ValidationError(_(
+                    "Inconsistencia de edad: '%(a)s' (nacido %(a_b)s) no puede ser "
+                    "%(rel)s de '%(b)s' (nacido %(b_b)s). El %(rel)s debe haber nacido antes."
+                ) % {
+                    "a": rec.partner_a_id.name, "a_b": a_birth,
+                    "rel": label,
+                    "b": rec.partner_b_id.name, "b_b": b_birth,
+                })
+            if rtype in A_YOUNGER_THAN_B and a_birth <= b_birth:
+                raise ValidationError(_(
+                    "Inconsistencia de edad: '%(a)s' (nacido %(a_b)s) no puede ser "
+                    "%(rel)s de '%(b)s' (nacido %(b_b)s). El %(rel)s debe haber nacido después."
+                ) % {
+                    "a": rec.partner_a_id.name, "a_b": a_birth,
+                    "rel": label,
+                    "b": rec.partner_b_id.name, "b_b": b_birth,
+                })
 
     # -------------------------------------------------------------------------
     # Bidirectional auto-management
