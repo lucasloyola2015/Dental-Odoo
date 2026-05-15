@@ -60,8 +60,10 @@
                                 <field name="gender"/>
                             </group>
                             <group string="Contacto">
-                                <field name="phone" widget="phone"/>
-                                <field name="email" widget="email"/>
+                                <field name="use_external_contact"/>
+                                <field name="phone" widget="phone" invisible="use_external_contact"/>
+                                <field name="email" widget="email" invisible="use_external_contact"/>
+                                <field name="external_contact_summary" readonly="1" widget="text" invisible="not use_external_contact" nolabel="1" colspan="2"/>
                             </group>
                         </group>
                         <group>
@@ -70,43 +72,20 @@
                             </group>
                         </group>
                         <notebook>
-                            <page string="Canales" name="channels">
-                                <field name="clinic_person_contact_ids" context="{'default_partner_id': partner_id}">
+                            <page string="Vínculos" name="links">
+                                <p class="text-muted">
+                                    Cada vínculo se crea automáticamente en ambas direcciones (si Pedro es padre de Sofía, Sofía será hija de Pedro). Las casillas indican lo que la otra persona puede hacer sobre este paciente.
+                                </p>
+                                <field name="clinic_link_as_b_ids" nolabel="1" context="{'default_partner_b_id': partner_id}">
                                     <list editable="bottom">
-                                        <field name="contact_type" string="Tipo" optional="show"/>
-                                        <field name="contact_id" string="Canal"/>
-                                        <field name="role"/>
-                                        <field name="is_primary" widget="boolean_toggle"/>
-                                        <field name="start_date" optional="hide"/>
-                                        <field name="end_date" optional="hide"/>
+                                        <field name="partner_a_id" string="Persona" required="1"/>
+                                        <field name="relationship_type" string="es"/>
+                                        <field name="is_legal_guardian" widget="boolean_toggle" optional="show"/>
+                                        <field name="can_consent" widget="boolean_toggle" optional="show"/>
+                                        <field name="can_be_contacted" widget="boolean_toggle" optional="show"/>
+                                        <field name="notes" optional="hide"/>
                                     </list>
                                 </field>
-                            </page>
-                            <page string="Vínculos" name="links">
-                                <group>
-                                    <label for="clinic_link_as_a_ids" string="Esta persona ES (de otros)"/>
-                                    <field name="clinic_link_as_a_ids" nolabel="1">
-                                        <list editable="bottom">
-                                            <field name="partner_b_id" string="Otra persona"/>
-                                            <field name="relationship_type"/>
-                                            <field name="is_legal_guardian" widget="boolean_toggle" optional="show"/>
-                                            <field name="can_consent" widget="boolean_toggle" optional="show"/>
-                                            <field name="can_be_contacted" widget="boolean_toggle" optional="show"/>
-                                        </list>
-                                    </field>
-                                </group>
-                                <group>
-                                    <label for="clinic_link_as_b_ids" string="Otros SON (de esta persona)"/>
-                                    <field name="clinic_link_as_b_ids" nolabel="1" readonly="1">
-                                        <list>
-                                            <field name="partner_a_id" string="Persona"/>
-                                            <field name="relationship_type"/>
-                                            <field name="is_legal_guardian"/>
-                                            <field name="can_consent"/>
-                                            <field name="can_be_contacted"/>
-                                        </list>
-                                    </field>
-                                </group>
                             </page>
                             <page string="Coberturas" name="coverage">
                                 <field name="coverage_ids" context="{'default_patient_id': id}">

@@ -1,4 +1,5 @@
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ClinicPatient(models.Model):
@@ -50,6 +51,76 @@ class ClinicPatient(models.Model):
         inverse_name="patient_id",
         string="Coberturas (Obras sociales)",
     )
+
+    # --- Contact target (own phone/email OR external via person link) ---
+    use_external_contact = fields.Boolean(
+        string="Contacto externo",
+        default=False,
+        help=(
+            "Si se tilda, el paciente NO se contacta por sus propios teléfonos. "
+            "Se contacta vía los vínculos del tab 'Vínculos' que tengan 'Puede ser contactado' tildado. "
+            "Caso típico: menores sin teléfono propio, contactados via padre/madre/tutor."
+        ),
+    )
+    external_contact_summary = fields.Text(
+        string="Contactar via",
+        compute="_compute_external_contact_summary",
+    )
+
+    @api.depends("partner_id", "use_external_contact")
+    def _compute_external_contact_summary(self):
+        Link = self.env["clinic.person.link"]
+        for rec in self:
+            if not rec.use_external_contact or not rec.partner_id:
+                rec.external_contact_summary = False
+                continue
+            # Find links where this partner is partner_b (someone else has can_be_contacted over them)
+            links = Link.search([
+                ("partner_b_id", "=", rec.partner_id.id),
+                ("can_be_contacted", "=", True),
+            ])
+            if not links:
+                rec.external_contact_summary = (
+                    "⚠ Sin contactos disponibles. Cargá un vínculo en el tab 'Vínculos' "
+                    "con la casilla 'Puede ser contactado' tildada."
+                )
+                continue
+            type_labels = dict(Link._fields["relationship_type"].selection)
+            lines = []
+            for link in links:
+                other = link.partner_a_id
+                phone_parts = []
+                if other.phone:
+                    phone_parts.append(f"📞 {other.phone}")
+                if other.email:
+                    phone_parts.append(f"✉ {other.email}")
+                phones = " · ".join(phone_parts) if phone_parts else "(sin canales)"
+                type_label = type_labels.get(link.relationship_type, link.relationship_type)
+                lines.append(f"• {other.name} ({type_label}): {phones}")
+            rec.external_contact_summary = "\n".join(lines)
+
+    @api.constrains("use_external_contact", "partner_id")
+    def _check_contact_target(self):
+        Link = self.env["clinic.person.link"]
+        for rec in self:
+            if rec.use_external_contact:
+                count = Link.search_count([
+                    ("partner_b_id", "=", rec.partner_id.id),
+                    ("can_be_contacted", "=", True),
+                ])
+                if not count:
+                    raise ValidationError(_(
+                        "El paciente está marcado como 'Contacto externo' pero no tiene ningún vínculo "
+                        "con 'Puede ser contactado' tildado. Cargá uno en el tab 'Vínculos'."
+                    ))
+            else:
+                p = rec.partner_id
+                if not (p.phone or p.email):
+                    raise ValidationError(_(
+                        "El paciente debe tener teléfono o email propio. "
+                        "Si su contacto es externo (ej. menor con padre como contacto), "
+                        "marcá la casilla 'Contacto externo'."
+                    ))
     appointment_ids = fields.One2many(
         comodel_name="clinic.appointment",
         inverse_name="patient_id",

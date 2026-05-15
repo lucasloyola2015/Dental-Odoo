@@ -58,14 +58,7 @@ class ResPartner(models.Model):
     )
     clinic_patient_count = fields.Integer(compute="_compute_clinic_patient_count")
 
-    # --- Contact channels ---
-    clinic_person_contact_ids = fields.One2many(
-        comodel_name="clinic.person.contact",
-        inverse_name="partner_id",
-        string="Canales de contacto",
-    )
-
-    # --- Human links (only direction A → B; B → A would be a separate row) ---
+    # --- Human links (bidirectional: each row has a mirror) ---
     clinic_link_as_a_ids = fields.One2many(
         comodel_name="clinic.person.link",
         inverse_name="partner_a_id",

@@ -2,8 +2,6 @@ from . import res_partner
 from . import hr_employee
 from . import clinic_specialty
 from . import clinic_patient
-from . import clinic_contact
-from . import clinic_person_contact
 from . import clinic_person_link
 from . import clinic_health_insurance
 from . import clinic_billing_route

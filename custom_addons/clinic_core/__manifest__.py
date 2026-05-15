@@ -34,7 +34,6 @@ en este módulo.
         "views/hr_employee_views.xml",
         "views/clinic_specialty_views.xml",
         "views/clinic_patient_views.xml",
-        "views/clinic_contact_views.xml",
         "views/clinic_health_insurance_views.xml",
         "views/clinic_billing_route_views.xml",
         "views/clinic_insurance_route_views.xml",
