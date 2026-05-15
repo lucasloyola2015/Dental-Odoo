@@ -20,6 +20,14 @@ class HrEmployee(models.Model):
         tracking=True,
         help="Número de matrícula provincial o nacional. Ej: 'MP 12345'.",
     )
+    vat = fields.Char(
+        string="DNI",
+        related="work_contact_id.vat",
+        readonly=False,
+        store=True,
+        tracking=True,
+        help="DNI del profesional. Se sincroniza con su contacto asociado.",
+    )
     default_appointment_duration_minutes = fields.Integer(
         string="Duración default de turno (min)",
         help=(

@@ -78,25 +78,6 @@
             </field>
         </record>
 
-        <!-- Filtered action: only clinic practitioners -->
-        <record id="action_clinic_practitioner" model="ir.actions.act_window">
-            <field name="name">Profesionales</field>
-            <field name="res_model">hr.employee</field>
-            <field name="view_mode">kanban,list,form</field>
-            <field name="domain">[('is_clinic_practitioner', '=', True)]</field>
-            <field name="context">{'default_is_clinic_practitioner': True}</field>
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
-                    Cargá el primer profesional de la clínica.
-                </p>
-                <p>
-                    Un profesional clínico se modela como empleado (hr.employee) con datos clínicos:
-                    matrícula, especialidades, duración default, prácticas que realiza y un rol por cada
-                    compañía donde atiende (con horario laboral y obras sociales habilitadas).
-                </p>
-            </field>
-        </record>
-
         <menuitem
             id="menu_clinic_practitioner"
             name="Profesionales"

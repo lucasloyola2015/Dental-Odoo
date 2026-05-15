@@ -31,6 +31,7 @@ en este módulo.
         "security/ir.model.access.csv",
         "views/menu_views.xml",
         "views/res_partner_views.xml",
+        "views/clinic_practitioner_form.xml",
         "views/hr_employee_views.xml",
         "views/clinic_specialty_views.xml",
         "views/clinic_patient_views.xml",
