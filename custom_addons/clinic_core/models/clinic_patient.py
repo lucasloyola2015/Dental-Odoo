@@ -29,6 +29,9 @@ class ClinicPatient(models.Model):
         tracking=True,
         copy=False,
         index=True,
+        readonly=True,
+        default=lambda self: _("New"),
+        help="Generado automáticamente al crear el paciente. Formato: HC-YYYYNNNN.",
     )
     secretariat_notes = fields.Text(
         string="Notas de secretaría",
@@ -84,6 +87,11 @@ class ClinicPatient(models.Model):
             vals.setdefault("partner_id", False)
             if vals.get("partner_id"):
                 self.env["res.partner"].browse(vals["partner_id"]).is_clinic_person = True
+            # Auto-generate HC number from sequence
+            hcn = vals.get("medical_history_number")
+            if not hcn or hcn == _("New"):
+                seq = self.env["ir.sequence"].next_by_code("clinic.patient.hc")
+                vals["medical_history_number"] = seq or "HC-NEW"
         records = super().create(vals_list)
         for rec in records:
             if not rec.partner_id.is_clinic_person:

@@ -1,4 +1,7 @@
-from odoo import api, fields, models
+import re
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResPartner(models.Model):
@@ -61,6 +64,27 @@ class ResPartner(models.Model):
     def _compute_clinic_patient_count(self):
         for rec in self:
             rec.clinic_patient_count = len(rec.clinic_patient_ids)
+
+    # -------------------------------------------------------------------------
+    # DNI validation for clinic persons (Argentina: 7 or 8 digits, no CUIT)
+    # -------------------------------------------------------------------------
+    @api.constrains("vat", "is_clinic_person")
+    def _check_dni_format(self):
+        for rec in self:
+            if not rec.is_clinic_person or not rec.vat:
+                continue
+            cleaned = re.sub(r"[\s\.\-]", "", rec.vat)
+            if not re.fullmatch(r"\d{7,8}", cleaned):
+                raise ValidationError(_(
+                    "El DNI debe contener entre 7 y 8 dígitos numéricos. "
+                    "Recibí: '%s'. Ejemplo válido: 30234567."
+                ) % rec.vat)
+
+    @api.onchange("vat")
+    def _onchange_vat_normalize_dni(self):
+        """Strip dots/dashes/spaces from DNI when entered on clinic persons."""
+        if self.is_clinic_person and self.vat:
+            self.vat = re.sub(r"[\s\.\-]", "", self.vat)
 
     def action_view_clinic_patients(self):
         self.ensure_one()

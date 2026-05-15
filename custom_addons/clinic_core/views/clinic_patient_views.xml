@@ -9,7 +9,7 @@
                 <list string="Pacientes">
                     <field name="medical_history_number" string="N° HC"/>
                     <field name="name"/>
-                    <field name="vat" string="DNI/CUIT"/>
+                    <field name="vat" string="DNI"/>
                     <field name="birthdate"/>
                     <field name="phone" optional="show"/>
                     <field name="email" optional="hide"/>
@@ -49,8 +49,8 @@
                         </div>
                         <group>
                             <group string="Identificación">
-                                <field name="medical_history_number"/>
-                                <field name="vat" string="DNI / CUIT"/>
+                                <field name="medical_history_number" readonly="1"/>
+                                <field name="vat" string="DNI" placeholder="30234567"/>
                                 <field name="birthdate"/>
                                 <field name="gender"/>
                             </group>
@@ -142,7 +142,7 @@
             <field name="model">clinic.patient</field>
             <field name="arch" type="xml">
                 <search>
-                    <field name="name" string="Nombre / DNI" filter_domain="['|', ('name', 'ilike', self), ('vat', 'ilike', self)]"/>
+                    <field name="name" string="Nombre / DNI / HC" filter_domain="['|', '|', ('name', 'ilike', self), ('vat', 'ilike', self), ('medical_history_number', 'ilike', self)]"/>
                     <field name="medical_history_number" string="N° HC"/>
                     <field name="phone"/>
                     <field name="email"/>

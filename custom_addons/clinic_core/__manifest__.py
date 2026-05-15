@@ -45,6 +45,7 @@ en este módulo.
         "views/clinic_appointment_views.xml",
         "views/clinic_dashboard_views.xml",
         "wizards/clinic_appointment_wizard_views.xml",
+        "data/clinic_patient_sequence.xml",
         "data/clinic_specialty_data.xml",
         "data/clinic_billing_route_data.xml",
         "data/clinic_health_insurance_data.xml",
