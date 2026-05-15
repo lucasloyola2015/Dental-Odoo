@@ -136,6 +136,25 @@ class HrEmployee(models.Model):
         if self.specialty_main_id and self.specialty_main_id not in self.specialty_ids:
             self.specialty_ids = [(4, self.specialty_main_id.id)]
 
+    # -------------------------------------------------------------------------
+    # Sync name to work_contact_id (Odoo native does NOT do this automatically)
+    # -------------------------------------------------------------------------
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for emp in records:
+            if emp.work_contact_id and emp.name and emp.work_contact_id.name != emp.name:
+                emp.work_contact_id.name = emp.name
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "name" in vals:
+            for emp in self:
+                if emp.work_contact_id and emp.work_contact_id.name != emp.name:
+                    emp.work_contact_id.name = emp.name
+        return res
+
     def get_default_appointment_duration(self, practice=None):
         """Returns the default duration in minutes for a new appointment.
 
