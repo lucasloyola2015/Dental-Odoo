@@ -23,6 +23,9 @@
                             <button name="action_new_appointment" type="object"
                                     string="+ Nuevo turno"
                                     class="btn btn-primary"/>
+                            <button name="action_search_availability" type="object"
+                                    string="🔍 Buscar disponibilidad"
+                                    class="btn btn-primary"/>
                             <button name="action_new_patient" type="object"
                                     string="+ Nuevo paciente"
                                     class="btn btn-secondary"/>

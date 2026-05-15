@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_appointment_wizard_form" model="ir.ui.view">
+            <field name="name">clinic.appointment.wizard.form</field>
+            <field name="model">clinic.appointment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Buscar disponibilidad y agendar">
+                    <field name="state" invisible="1"/>
+                    <field name="slot_count" invisible="1"/>
+
+                    <!-- ============================================ -->
+                    <!-- Step 1: Inputs                                -->
+                    <!-- ============================================ -->
+                    <group invisible="state == 'searched'">
+                        <group string="Quién">
+                            <field name="patient_id"/>
+                            <field name="practitioner_id"/>
+                            <field name="practice_id"/>
+                            <field name="coverage_id" options="{'no_create': True}"/>
+                            <field name="billing_route_id" options="{'no_create': True}"/>
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Búsqueda">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="duration_minutes"/>
+                            <field name="step_minutes"/>
+                            <field name="is_overbooking"/>
+                        </group>
+                    </group>
+                    <group invisible="state == 'searched'">
+                        <field name="appointment_reason" placeholder="Lo que dijo el paciente al pedir turno..."/>
+                    </group>
+
+                    <footer invisible="state == 'searched'">
+                        <button name="action_search_slots" type="object"
+                                string="🔍 Buscar huecos disponibles"
+                                class="btn-primary"/>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+
+                    <!-- ============================================ -->
+                    <!-- Step 2: Results                               -->
+                    <!-- ============================================ -->
+                    <div invisible="state != 'searched'">
+                        <div class="alert alert-info mb-3" role="alert">
+                            <strong>Resumen:</strong>
+                            <field name="patient_id" readonly="1" nolabel="1" class="oe_inline"/> con
+                            <field name="practitioner_id" readonly="1" nolabel="1" class="oe_inline"/>,
+                            <field name="duration_minutes" readonly="1" nolabel="1" class="oe_inline"/> min,
+                            del <field name="date_from" readonly="1" nolabel="1" class="oe_inline"/>
+                            al <field name="date_to" readonly="1" nolabel="1" class="oe_inline"/>.
+                            <br/>
+                            <field name="search_message" readonly="1" nolabel="1" class="oe_inline"/>
+                        </div>
+
+                        <field name="slot_ids" readonly="1" nolabel="1" invisible="not slot_count">
+                            <list create="false" delete="false" edit="false">
+                                <field name="day_label" string="Día"/>
+                                <field name="start_datetime" widget="datetime" string="Inicio"/>
+                                <field name="end_datetime" widget="datetime" string="Fin" optional="hide"/>
+                                <button name="action_select_slot" type="object"
+                                        string="Agendar"
+                                        class="btn-primary btn-sm"
+                                        icon="fa-check"/>
+                            </list>
+                        </field>
+                    </div>
+
+                    <footer invisible="state != 'searched'">
+                        <button name="action_back_to_inputs" type="object"
+                                string="← Modificar búsqueda"
+                                class="btn-secondary"/>
+                        <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                    </footer>
+
+                </form>
+            </field>
+        </record>
+
+        <record id="action_clinic_appointment_wizard" model="ir.actions.act_window">
+            <field name="name">Buscar disponibilidad</field>
+            <field name="res_model">clinic.appointment.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_clinic_patient"/>
+            <field name="binding_view_types">form</field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_appointment_wizard"
+            name="Buscar disponibilidad"
+            parent="menu_clinic_root"
+            action="action_clinic_appointment_wizard"
+            sequence="7"/>
+
+    </data>
+</odoo>

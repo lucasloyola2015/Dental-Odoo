@@ -223,6 +223,16 @@ class ClinicDashboard(models.TransientModel):
         action["view_mode"] = "calendar,list,form"
         return action
 
+    def action_search_availability(self):
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Buscar disponibilidad",
+            "res_model": "clinic.appointment.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {},
+        }
+
     # -------------------------------------------------------------------------
     # Charts (open graph/pivot of clinic.appointment with preset groupbys)
     # -------------------------------------------------------------------------
