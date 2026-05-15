@@ -144,15 +144,15 @@ class HrEmployee(models.Model):
         records = super().create(vals_list)
         for emp in records:
             if emp.work_contact_id and emp.name and emp.work_contact_id.name != emp.name:
-                emp.work_contact_id.name = emp.name
+                emp.work_contact_id.with_context(_syncing_name=True).name = emp.name
         return records
 
     def write(self, vals):
         res = super().write(vals)
-        if "name" in vals:
+        if "name" in vals and not self.env.context.get("_syncing_name"):
             for emp in self:
                 if emp.work_contact_id and emp.work_contact_id.name != emp.name:
-                    emp.work_contact_id.name = emp.name
+                    emp.work_contact_id.with_context(_syncing_name=True).name = emp.name
         return res
 
     def get_default_appointment_duration(self, practice=None):

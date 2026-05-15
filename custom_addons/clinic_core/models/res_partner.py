@@ -107,6 +107,22 @@ class ResPartner(models.Model):
         if self.is_clinic_person and self.vat:
             self.vat = re.sub(r"[\s\.\-]", "", self.vat)
 
+    # -------------------------------------------------------------------------
+    # Sync partner name back to hr.employee (Odoo native is one-directional)
+    # -------------------------------------------------------------------------
+    def write(self, vals):
+        res = super().write(vals)
+        if "name" in vals and not self.env.context.get("_syncing_name"):
+            # Find employees whose work_contact_id points at any of these partners
+            employees = self.env["hr.employee"].sudo().search([
+                ("work_contact_id", "in", self.ids),
+            ])
+            for emp in employees:
+                target_name = emp.work_contact_id.name
+                if emp.name != target_name:
+                    emp.with_context(_syncing_name=True).write({"name": target_name})
+        return res
+
     @api.model
     def name_search(self, name="", domain=None, operator="ilike", limit=100):
         """Allow searching res.partner by DNI when the term looks like one.
