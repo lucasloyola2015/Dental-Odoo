@@ -145,7 +145,7 @@
                           mode="week"
                           quick_create="0">
                     <field name="patient_id" filters="1"/>
-                    <field name="practitioner_id" filters="1" color="practitioner_id"/>
+                    <field name="practitioner_id" filters="1"/>
                     <field name="practice_id"/>
                     <field name="state"/>
                 </calendar>
