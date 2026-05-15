@@ -7,9 +7,23 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
+
+                <!-- Smart button: jump to patient record(s) -->
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                    <button name="action_view_clinic_patients"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-medkit"
+                            invisible="not clinic_patient_count">
+                        <field name="clinic_patient_count" widget="statinfo" string="Pacientes"/>
+                    </button>
+                </xpath>
+
+                <!-- Flag + clinic-only tabs -->
                 <xpath expr="//field[@name='function']" position="after">
                     <field name="is_clinic_person" invisible="is_company"/>
                 </xpath>
+
                 <xpath expr="//notebook" position="inside">
                     <page string="Datos clínicos" name="clinic" invisible="not is_clinic_person">
                         <group>
@@ -20,7 +34,46 @@
                         </group>
                         <field name="clinic_observations" placeholder="Notas relevantes para la atención..."/>
                     </page>
+                    <page string="Canales" name="clinic_channels" invisible="not is_clinic_person">
+                        <field name="clinic_person_contact_ids" context="{'default_partner_id': id}">
+                            <list editable="bottom">
+                                <field name="contact_type" string="Tipo" optional="show"/>
+                                <field name="contact_id" string="Canal"/>
+                                <field name="role"/>
+                                <field name="is_primary" widget="boolean_toggle"/>
+                                <field name="start_date" optional="hide"/>
+                                <field name="end_date" optional="hide"/>
+                            </list>
+                        </field>
+                    </page>
+                    <page string="Vínculos" name="clinic_links" invisible="not is_clinic_person">
+                        <group>
+                            <label for="clinic_link_as_a_ids" string="Esta persona ES (de otros)"/>
+                            <field name="clinic_link_as_a_ids" nolabel="1" context="{'default_partner_a_id': id}">
+                                <list editable="bottom">
+                                    <field name="partner_b_id" string="Otra persona"/>
+                                    <field name="relationship_type"/>
+                                    <field name="is_legal_guardian" widget="boolean_toggle" optional="show"/>
+                                    <field name="can_consent" widget="boolean_toggle" optional="show"/>
+                                    <field name="can_be_contacted" widget="boolean_toggle" optional="show"/>
+                                </list>
+                            </field>
+                        </group>
+                        <group>
+                            <label for="clinic_link_as_b_ids" string="Otros SON (de esta persona)"/>
+                            <field name="clinic_link_as_b_ids" nolabel="1" readonly="1">
+                                <list>
+                                    <field name="partner_a_id" string="Persona"/>
+                                    <field name="relationship_type"/>
+                                    <field name="is_legal_guardian"/>
+                                    <field name="can_consent"/>
+                                    <field name="can_be_contacted"/>
+                                </list>
+                            </field>
+                        </group>
+                    </page>
                 </xpath>
+
             </field>
         </record>
 

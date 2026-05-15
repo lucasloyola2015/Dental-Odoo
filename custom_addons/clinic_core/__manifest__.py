@@ -32,6 +32,8 @@ en este módulo.
         "views/menu_views.xml",
         "views/res_partner_views.xml",
         "views/clinic_specialty_views.xml",
+        "views/clinic_patient_views.xml",
+        "views/clinic_contact_views.xml",
         "data/clinic_specialty_data.xml",
     ],
     "installable": True,

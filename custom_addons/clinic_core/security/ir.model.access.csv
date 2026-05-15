@@ -1,3 +1,11 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_clinic_specialty_secretariat,clinic.specialty secretariat,model_clinic_specialty,group_clinic_secretariat,1,1,1,0
 access_clinic_specialty_admin,clinic.specialty admin,model_clinic_specialty,group_clinic_admin,1,1,1,1
+access_clinic_patient_secretariat,clinic.patient secretariat,model_clinic_patient,group_clinic_secretariat,1,1,1,0
+access_clinic_patient_admin,clinic.patient admin,model_clinic_patient,group_clinic_admin,1,1,1,1
+access_clinic_contact_secretariat,clinic.contact secretariat,model_clinic_contact,group_clinic_secretariat,1,1,1,0
+access_clinic_contact_admin,clinic.contact admin,model_clinic_contact,group_clinic_admin,1,1,1,1
+access_clinic_person_contact_secretariat,clinic.person.contact secretariat,model_clinic_person_contact,group_clinic_secretariat,1,1,1,1
+access_clinic_person_contact_admin,clinic.person.contact admin,model_clinic_person_contact,group_clinic_admin,1,1,1,1
+access_clinic_person_link_secretariat,clinic.person.link secretariat,model_clinic_person_link,group_clinic_secretariat,1,1,1,1
+access_clinic_person_link_admin,clinic.person.link admin,model_clinic_person_link,group_clinic_admin,1,1,1,1

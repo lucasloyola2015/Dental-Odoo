@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_patient_list" model="ir.ui.view">
+            <field name="name">clinic.patient.list</field>
+            <field name="model">clinic.patient</field>
+            <field name="arch" type="xml">
+                <list string="Pacientes">
+                    <field name="medical_history_number" string="N° HC"/>
+                    <field name="name"/>
+                    <field name="vat" string="DNI/CUIT"/>
+                    <field name="birthdate"/>
+                    <field name="phone" optional="show"/>
+                    <field name="email" optional="hide"/>
+                    <field name="start_date" optional="hide"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_patient_form" model="ir.ui.view">
+            <field name="name">clinic.patient.form</field>
+            <field name="model">clinic.patient</field>
+            <field name="arch" type="xml">
+                <form string="Paciente">
+                    <sheet>
+                        <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
+                        <field name="active" invisible="1"/>
+                        <field name="partner_id" invisible="1"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_partner" type="object" class="oe_stat_button" icon="fa-address-card">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Ver ficha</span>
+                                    <span class="o_stat_text">de Persona</span>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name" placeholder="Nombre Apellido" required="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Identificación">
+                                <field name="medical_history_number"/>
+                                <field name="vat" string="DNI / CUIT"/>
+                                <field name="birthdate"/>
+                                <field name="gender"/>
+                            </group>
+                            <group string="Contacto">
+                                <field name="phone" widget="phone"/>
+                                <field name="email" widget="email"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Gestión">
+                                <field name="start_date"/>
+                                <field name="end_date"/>
+                                <field name="end_reason" invisible="not end_date"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Canales" name="channels">
+                                <field name="clinic_person_contact_ids" context="{'default_partner_id': partner_id}">
+                                    <list editable="bottom">
+                                        <field name="contact_type" string="Tipo" optional="show"/>
+                                        <field name="contact_id" string="Canal"/>
+                                        <field name="role"/>
+                                        <field name="is_primary" widget="boolean_toggle"/>
+                                        <field name="start_date" optional="hide"/>
+                                        <field name="end_date" optional="hide"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Vínculos" name="links">
+                                <group>
+                                    <label for="clinic_link_as_a_ids" string="Esta persona ES (de otros)"/>
+                                    <field name="clinic_link_as_a_ids" nolabel="1">
+                                        <list editable="bottom">
+                                            <field name="partner_b_id" string="Otra persona"/>
+                                            <field name="relationship_type"/>
+                                            <field name="is_legal_guardian" widget="boolean_toggle" optional="show"/>
+                                            <field name="can_consent" widget="boolean_toggle" optional="show"/>
+                                            <field name="can_be_contacted" widget="boolean_toggle" optional="show"/>
+                                        </list>
+                                    </field>
+                                </group>
+                                <group>
+                                    <label for="clinic_link_as_b_ids" string="Otros SON (de esta persona)"/>
+                                    <field name="clinic_link_as_b_ids" nolabel="1" readonly="1">
+                                        <list>
+                                            <field name="partner_a_id" string="Persona"/>
+                                            <field name="relationship_type"/>
+                                            <field name="is_legal_guardian"/>
+                                            <field name="can_consent"/>
+                                            <field name="can_be_contacted"/>
+                                        </list>
+                                    </field>
+                                </group>
+                            </page>
+                            <page string="Notas" name="notes">
+                                <group>
+                                    <field name="secretariat_notes" placeholder="Notas operativas de la secretaría..." nolabel="1"/>
+                                </group>
+                                <group>
+                                    <field name="clinic_observations" placeholder="Observaciones generales de la persona..." nolabel="1"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_patient_search" model="ir.ui.view">
+            <field name="name">clinic.patient.search</field>
+            <field name="model">clinic.patient</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" string="Nombre / DNI" filter_domain="['|', ('name', 'ilike', self), ('vat', 'ilike', self)]"/>
+                    <field name="medical_history_number" string="N° HC"/>
+                    <field name="phone"/>
+                    <field name="email"/>
+                    <separator/>
+                    <filter name="filter_archived" string="Archivados" domain="[('active', '=', False)]"/>
+                    <separator/>
+                    <group>
+                        <filter name="group_by_company" string="Compañía" domain="[]" context="{'group_by': 'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_patient" model="ir.actions.act_window">
+            <field name="name">Pacientes</field>
+            <field name="res_model">clinic.patient</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_patient_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Cargá el primer paciente.
+                </p>
+                <p>
+                    Cada paciente se vincula a una persona física (res.partner). Si la persona ya existe
+                    en el sistema (porque es contacto, titular de obra social, etc.), reusala. La historia
+                    clínica pertenece a la clínica/compañía en la que se atiende.
+                </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_patient"
+            name="Pacientes"
+            parent="menu_clinic_root"
+            action="action_clinic_patient"
+            sequence="10"/>
+
+    </data>
+</odoo>
