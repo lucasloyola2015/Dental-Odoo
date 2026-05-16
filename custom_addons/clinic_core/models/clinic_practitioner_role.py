@@ -125,6 +125,15 @@ class ClinicPractitionerRole(models.Model):
         store=True,
         help="OS vigentes en la asociación de la sede menos las excluidas explícitamente.",
     )
+    particular_percentage = fields.Float(
+        string="% sobre Colegio (particular)",
+        default=100.0,
+        tracking=True,
+        help=(
+            "Porcentaje del precio del Colegio (tarifa PARTICULAR) que el profesional cobra "
+            "cuando atiende particular en esta sede. 100 = igual al Colegio; 80 = descuento; 120 = recargo."
+        ),
+    )
     gcal_calendar_id = fields.Char(
         string="Google Calendar ID",
         help="ID del calendario en Google Calendar para sync (V2).",
@@ -239,6 +248,12 @@ class ClinicPractitionerRole(models.Model):
         for rec in self:
             if rec.valid_to and rec.valid_from and rec.valid_to < rec.valid_from:
                 raise ValidationError(_("Vigente hasta no puede ser anterior a Vigente desde."))
+
+    @api.constrains("particular_percentage")
+    def _check_particular_percentage(self):
+        for rec in self:
+            if rec.particular_percentage < 0:
+                raise ValidationError(_("El %% sobre Colegio no puede ser negativo."))
 
     @api.constrains("excluded_insurance_ids", "available_insurance_ids")
     def _check_excluded_subset_of_available(self):

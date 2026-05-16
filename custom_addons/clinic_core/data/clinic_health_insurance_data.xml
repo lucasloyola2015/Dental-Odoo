@@ -2,11 +2,13 @@
 <odoo>
     <data noupdate="0">
 
+        <!-- SINGLETON: la lógica del sistema referencia este registro por xml_id
+             (clinic_core.health_insurance_particular). Nunca borrarlo ni renombrar
+             el xml_id, o se rompe el cálculo de presupuesto particular. -->
         <record id="health_insurance_particular" model="clinic.health.insurance">
             <field name="code">PARTICULAR</field>
             <field name="name">Particular</field>
-            <field name="is_particular">True</field>
-            <field name="observations">Atención particular sin obra social. El paciente paga directo al profesional / clínica.</field>
+            <field name="observations">Atención particular sin obra social. El paciente paga directo al profesional / clínica. El tarifario asociado refleja los valores del Colegio de Odontólogos Santa Fe 2da Circunscripción.</field>
         </record>
 
         <record id="health_insurance_iapos" model="clinic.health.insurance">

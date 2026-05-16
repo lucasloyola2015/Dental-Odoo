@@ -270,14 +270,17 @@ role_tenaglia_rol = env["clinic.practitioner.role"].create({
     "resource_calendar_id": calendar_tenaglia_rol.id,
     "assigned_route_id": location_rol.billing_route_id.id,
     "calendar_color": "#1f77b4",
+    "particular_percentage": 100.0,
 })
 # En FUN trabaja con ASOR aceptando todas sus OS. (Probar la exclusion manual desde la UI.)
+# Cobra 10% mas particular (zona Funes mas cara).
 role_tenaglia_fun = env["clinic.practitioner.role"].create({
     "employee_id": dra_tenaglia.id,
     "location_id": location_fun.id,
     "resource_calendar_id": calendar_tenaglia_fun.id,
     "assigned_route_id": location_fun.billing_route_id.id,
     "calendar_color": "#1f77b4",
+    "particular_percentage": 110.0,
 })
 
 dr_soto = env["hr.employee"].create({
@@ -293,12 +296,14 @@ dr_soto = env["hr.employee"].create({
 })
 
 # Soto solo en ROL — trabaja con AOSS aceptando todas las OS
+# Cobra 5% menos particular (descuento sobre Colegio).
 role_soto_rol = env["clinic.practitioner.role"].create({
     "employee_id": dr_soto.id,
     "location_id": location_rol.id,
     "resource_calendar_id": calendar_soto_rol.id,
     "assigned_route_id": location_rol.billing_route_id.id,
     "calendar_color": "#ff7f0e",
+    "particular_percentage": 95.0,
 })
 
 dra_cardozo = env["hr.employee"].create({
@@ -320,69 +325,66 @@ role_cardozo_fun = env["clinic.practitioner.role"].create({
     "resource_calendar_id": calendar_cardozo_fun.id,
     "assigned_route_id": location_fun.billing_route_id.id,
     "calendar_color": "#2ca02c",
+    "particular_percentage": 100.0,
 })
 
 print(f"  Created 3 practitioners with 4 sede-roles total.")
 
 # =============================================================================
-# PRACTITIONER-PRACTICES (precios por sede)
+# PRACTITIONER-PRACTICES (que prac hace cada profesional, en que sede, con que duracion)
 # =============================================================================
+# El precio particular ya no vive aca: se calcula como tarifa PARTICULAR (Colegio)
+# × clinic.practitioner.role.particular_percentage. Aca solo se guarda QUE prac
+# realiza cada profesional y su DURACION override.
 print("\n[5/8] Creating practitioner-practices per sede...")
 
-# (employee, practice_xmlid, price, duration, location)
-# Tenaglia atiende lo mismo en las dos sedes, pero algunos precios varian un poco
-tenaglia_practices_rol = [
-    ("practice_01_01", 30000, 30),
-    ("practice_01_04", 35000, 30),
-    ("practice_02_01", 50000, 45),
-    ("practice_02_02", 70000, 60),
-    ("practice_02_03", 95000, 75),
-    ("practice_05_01", 40000, 30),
-    ("practice_05_02", 20000, 15),
-    ("practice_05_04", 30000, 30),
-    ("practice_05_05", 22000, 15),
-    ("practice_07_01", 35000, 30),
-    ("practice_08_01", 40000, 45),
-    ("practice_08_02", 80000, 60),
-]
-# En FUN cobra ~10% mas particular (zona mas cara)
-tenaglia_practices_fun = [
-    (p, int(price * 1.1), dur) for (p, price, dur) in tenaglia_practices_rol
+tenaglia_practices = [
+    ("practice_01_01", 30),
+    ("practice_01_04", 30),
+    ("practice_02_01", 45),
+    ("practice_02_02", 60),
+    ("practice_02_03", 75),
+    ("practice_05_01", 30),
+    ("practice_05_02", 15),
+    ("practice_05_04", 30),
+    ("practice_05_05", 15),
+    ("practice_07_01", 30),
+    ("practice_08_01", 45),
+    ("practice_08_02", 60),
 ]
 
 soto_practices_rol = [
-    ("practice_01_01", 35000, 30),
-    ("practice_03_01", 110000, 60),
-    ("practice_03_02", 170000, 75),
-    ("practice_03_03", 195000, 90),
-    ("practice_03_04", 230000, 90),
-    ("practice_03_05", 80000, 45),
-    ("practice_03_06", 70000, 45),
+    ("practice_01_01", 30),
+    ("practice_03_01", 60),
+    ("practice_03_02", 75),
+    ("practice_03_03", 90),
+    ("practice_03_04", 90),
+    ("practice_03_05", 45),
+    ("practice_03_06", 45),
 ]
 
 cardozo_practices_fun = [
-    ("practice_01_01", 35000, 30),
-    ("practice_09_02_05", 40000, 30),
-    ("practice_09_02_07", 45000, 30),
-    ("practice_10_01", 55000, 30),
-    ("practice_10_06", 65000, 45),
-    ("practice_10_09", 150000, 75),
+    ("practice_01_01", 30),
+    ("practice_09_02_05", 30),
+    ("practice_09_02_07", 30),
+    ("practice_10_01", 30),
+    ("practice_10_06", 45),
+    ("practice_10_09", 75),
 ]
 
 practitioner_practices = (
-    [(dra_tenaglia, p, price, dur, location_rol) for (p, price, dur) in tenaglia_practices_rol]
-    + [(dra_tenaglia, p, price, dur, location_fun) for (p, price, dur) in tenaglia_practices_fun]
-    + [(dr_soto, p, price, dur, location_rol) for (p, price, dur) in soto_practices_rol]
-    + [(dra_cardozo, p, price, dur, location_fun) for (p, price, dur) in cardozo_practices_fun]
+    [(dra_tenaglia, p, dur, location_rol) for (p, dur) in tenaglia_practices]
+    + [(dra_tenaglia, p, dur, location_fun) for (p, dur) in tenaglia_practices]
+    + [(dr_soto, p, dur, location_rol) for (p, dur) in soto_practices_rol]
+    + [(dra_cardozo, p, dur, location_fun) for (p, dur) in cardozo_practices_fun]
 )
 
-for emp, prac_xmlid, price, duration, loc in practitioner_practices:
+for emp, prac_xmlid, duration, loc in practitioner_practices:
     env["clinic.practitioner.practice"].create({
         "employee_id": emp.id,
         "practice_id": env.ref(f"clinic_core.{prac_xmlid}").id,
         "location_id": loc.id,
         "can_perform": True,
-        "price_particular": price,
         "default_duration_minutes": duration,
     })
 print(f"  Created {len(practitioner_practices)} practitioner-practice rows.")

@@ -5,17 +5,13 @@ from odoo.exceptions import ValidationError
 class ClinicHealthInsurance(models.Model):
     _name = "clinic.health.insurance"
     _description = "Obra social"
-    _order = "is_particular desc, name"
+    _order = "name"
 
     name = fields.Char(string="Nombre", required=True, translate=True)
     code = fields.Char(
         string="Código",
         required=True,
         help="Código corto identificador. Ej: IAPOS, AVALIAN, OSDE.",
-    )
-    is_particular = fields.Boolean(
-        string="Particular",
-        help="Marcalo cuando el 'pagador' es el propio paciente (atención particular sin obra social).",
     )
     observations = fields.Text(
         string="Observaciones",

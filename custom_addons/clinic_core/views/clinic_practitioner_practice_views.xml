@@ -12,7 +12,6 @@
                     <field name="location_id"/>
                     <field name="can_perform" widget="boolean_toggle"/>
                     <field name="default_duration_minutes"/>
-                    <field name="price_particular"/>
                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                     <field name="active" widget="boolean_toggle"/>
                 </list>
@@ -35,7 +34,6 @@
                             <group>
                                 <field name="can_perform"/>
                                 <field name="default_duration_minutes"/>
-                                <field name="price_particular"/>
                                 <field name="active"/>
                             </group>
                         </group>

@@ -24,6 +24,7 @@
                            readonly="routing_mode != 'association'"
                            optional="show"/>
                     <field name="effective_billing_route_id" string="Vía efectiva" optional="hide"/>
+                    <field name="particular_percentage" string="% Colegio" widget="percentage" optional="show"/>
                     <field name="valid_from" optional="hide"/>
                     <field name="valid_to" string="Vigencia hasta"/>
                     <field name="resource_calendar_id" optional="hide"/>
@@ -56,6 +57,7 @@
                             <group>
                                 <field name="valid_from"/>
                                 <field name="valid_to" string="Vigencia hasta"/>
+                                <field name="particular_percentage" string="% sobre Colegio (particular)"/>
                                 <field name="calendar_color" widget="color"/>
                                 <field name="gcal_calendar_id"/>
                             </group>

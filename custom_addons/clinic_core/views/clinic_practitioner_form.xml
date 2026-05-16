@@ -68,6 +68,7 @@
                                                string="OS que NO acepta"
                                                domain="[('id', 'in', available_insurance_ids)]"
                                                readonly="routing_mode != 'association'"/>
+                                        <field name="particular_percentage" string="% Colegio" widget="percentage"/>
                                         <field name="calendar_color" widget="color" optional="hide"/>
                                         <field name="valid_from" optional="hide"/>
                                         <field name="valid_to" string="Vigencia hasta"/>
@@ -76,14 +77,13 @@
                                     </list>
                                 </field>
                             </page>
-                            <page string="Prácticas y precios" name="practices">
+                            <page string="Prácticas que realiza" name="practices">
                                 <field name="practitioner_practice_ids" context="{'default_employee_id': id}">
                                     <list editable="bottom">
                                         <field name="location_id" options="{'no_create': True}"/>
                                         <field name="practice_id" options="{'no_create': True}"/>
                                         <field name="can_perform" widget="boolean_toggle"/>
                                         <field name="default_duration_minutes" string="Duración (min)"/>
-                                        <field name="price_particular" string="Precio particular ($)"/>
                                         <field name="active" widget="boolean_toggle"/>
                                     </list>
                                 </field>

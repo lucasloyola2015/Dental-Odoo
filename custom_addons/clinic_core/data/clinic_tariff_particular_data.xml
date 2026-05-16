@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            Tarifario PARTICULAR = precios de referencia del Colegio de Odontólogos
+            Santa Fe 2da Circunscripción.
+
+            Estos valores son MOCK iniciales (AVALIAN × 1.5 redondeado) para que la demo
+            calcule presupuestos particulares con números sensatos. Cuando se cargue el
+            tarifario real del Colegio, reemplazar los amount_paid_by_os y agregar un
+            nuevo registro con valid_from actualizado (no editar los históricos).
+
+            noupdate="1" para que los precios cargados manualmente desde la UI no se
+            pisen en cada upgrade del módulo.
+        -->
+
+        <record id="tariff_particular_01_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_01_01"/>
+            <field name="amount_paid_by_os">27000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_01_04" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_01_04"/>
+            <field name="amount_paid_by_os">37000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_02_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_02_01"/>
+            <field name="amount_paid_by_os">55000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_02_02" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_02_02"/>
+            <field name="amount_paid_by_os">69000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_02_03" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_02_03"/>
+            <field name="amount_paid_by_os">82000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_03_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_03_01"/>
+            <field name="amount_paid_by_os">130000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_03_02" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_03_02"/>
+            <field name="amount_paid_by_os">202000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_03_03" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_03_03"/>
+            <field name="amount_paid_by_os">237000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_03_04" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_03_04"/>
+            <field name="amount_paid_by_os">238000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_05_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_05_01"/>
+            <field name="amount_paid_by_os">39000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_05_02" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_05_02"/>
+            <field name="amount_paid_by_os">26000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_09_01_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_09_01_01"/>
+            <field name="amount_paid_by_os">14000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_09_02_04" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_09_02_04"/>
+            <field name="amount_paid_by_os">48000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_09_02_05" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_09_02_05"/>
+            <field name="amount_paid_by_os">48000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_09_02_07" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_09_02_07"/>
+            <field name="amount_paid_by_os">49000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+        <record id="tariff_particular_10_01" model="clinic.tariff">
+            <field name="health_insurance_id" ref="health_insurance_particular"/>
+            <field name="billing_route_id" ref="billing_route_particular"/>
+            <field name="practice_id" ref="practice_10_01"/>
+            <field name="amount_paid_by_os">63000.00</field>
+            <field name="valid_from">2025-11-01</field>
+        </record>
+
+    </data>
+</odoo>

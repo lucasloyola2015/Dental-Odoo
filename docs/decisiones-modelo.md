@@ -176,6 +176,42 @@ Cargado por `scripts/load_demo_data.py`: 2 sedes — **ROL** (Roldán Centro, AO
 
 ---
 
+## Q — PARTICULAR como OS singleton + tarifario del Colegio + % por sede
+
+Revisión de las decisiones de `ClinicBot/docs/05-...md` líneas 1466 y 1475 (que decían lo contrario). Acordada 2026-05-16.
+
+### Lo que cambia respecto de la doc ClinicBot
+| Antes (ClinicBot doc 05) | Ahora (Dental-Odoo decisión Q) |
+|---|---|
+| `clinic.health.insurance.is_particular` boolean (flag) | Eliminado. PARTICULAR es **singleton** identificado por xml_id `clinic_core.health_insurance_particular`. |
+| `tarifarios_referencia` (entidad separada) + `tarifario_referencia_practica` con desglose `costo_fijo+honorario` | Eliminado. El tarifario del Colegio vive en `clinic.tariff` con `health_insurance=PARTICULAR, billing_route=PARTICULAR`. Un único valor por práctica (`amount_paid_by_os`). |
+| `clinic.practitioner.practice.price_particular` (Float pesos por profesional × práctica × sede) | Eliminado. Reemplazado por... |
+| (no existía) | `clinic.practitioner.role.particular_percentage` (Float, % sobre Colegio). 100 = igual al Colegio. Granularidad por (profesional, sede). |
+
+### Cálculo del precio particular
+```
+precio_particular = clinic.tariff(OS=PARTICULAR, route=PARTICULAR, practice, vigente).amount_paid_by_os
+                    × clinic.practitioner.role(profesional, sede).particular_percentage / 100
+```
+
+### Identificación de PARTICULAR
+```python
+PARTICULAR = self.env.ref("clinic_core.health_insurance_particular", raise_if_not_found=False)
+is_particular = (not coverage) or coverage.health_insurance_id == PARTICULAR
+```
+
+### Why
+- **Robustez**: el xml_id singleton elimina la fragilidad del booleano (no se puede marcar 2 OS como particular, ni desmarcar la única).
+- **Un solo modelo de tarifa**: simplifica el código de presupuesto. Mismo lookup para OS reales y para PARTICULAR.
+- **Granularidad por sede sin sobre-modelado**: el % vive en `practitioner.role` (que ya es per-profesional-per-sede). Un profesional puede cobrar 100% en una sede y 110% en otra. Si el día de mañana hace falta granularidad por práctica, se sube a `practitioner.practice` con compute fallback al `role`.
+- **Gastos fijos clínica**: diferidos a iteration futura. En V1 todo va dentro del precio del Colegio × % del profesional.
+
+### Pendiente
+- Cargar el tarifario real del Colegio Santa Fe 2da Circunscripción (los valores actuales en `data/clinic_tariff_particular_data.xml` son mock = AVALIAN × 1.5).
+- Si en V2 hace falta el desglose `costo_fijo + honorario` (para liquidaciones tipo "70% del honorario del Colegio"), agregarlo como campos opcionales a `clinic.tariff` sin romper el shape actual.
+
+---
+
 ## Cómo aplicar estas decisiones
 
 - Antes de proponer modelos nuevos, releer estas decisiones.

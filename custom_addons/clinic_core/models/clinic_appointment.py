@@ -273,7 +273,7 @@ class ClinicAppointment(models.Model):
 
         Particular:
             - amount_paid_by_os = 0, copayment = 0
-            - professional_extra_auto = practitioner.practice.price_particular for this practice
+            - professional_extra_auto = clinic.tariff(PARTICULAR, this practice) × role.particular_percentage / 100
             - total = (override or auto) + clinic_extra
 
         With coverage:
@@ -288,7 +288,9 @@ class ClinicAppointment(models.Model):
         Tariff = self.env["clinic.tariff"]
         Copay = self.env["clinic.copayment"]
         BondSys = self.env["clinic.bond.system"]
-        PractPractice = self.env["clinic.practitioner.practice"]
+        Role = self.env["clinic.practitioner.role"]
+        PARTICULAR_OS = self.env.ref("clinic_core.health_insurance_particular", raise_if_not_found=False)
+        PARTICULAR_ROUTE = self.env.ref("clinic_core.billing_route_particular", raise_if_not_found=False)
 
         for rec in self:
             # Reset
@@ -307,23 +309,49 @@ class ClinicAppointment(models.Model):
                 continue
 
             ref_date = (rec.start_datetime or fields.Datetime.now()).date() if rec.start_datetime else fields.Date.today()
-            is_particular = (not rec.coverage_id) or rec.coverage_id.health_insurance_id.is_particular
+            is_particular = (not rec.coverage_id) or (
+                PARTICULAR_OS and rec.coverage_id.health_insurance_id == PARTICULAR_OS
+            )
 
             notes = []
 
             # ----------------------------- Particular -----------------------------
+            # Precio = tarifa PARTICULAR (referencia Colegio Odontólogos) × % del profesional en esta sede.
             if is_particular:
-                pp = PractPractice.search([
-                    ("employee_id", "=", rec.practitioner_id.id),
+                if not PARTICULAR_OS:
+                    rec.valuation_note = (
+                        "⚠ La OS singleton PARTICULAR no está configurada. "
+                        "Cargá el registro `clinic_core.health_insurance_particular` primero."
+                    )
+                    continue
+
+                tariff_domain = [
+                    ("health_insurance_id", "=", PARTICULAR_OS.id),
                     ("practice_id", "=", rec.practice_id.id),
+                    ("valid_from", "<=", ref_date),
+                    ("company_id", "in", (False, rec.company_id.id)),
+                ]
+                if PARTICULAR_ROUTE:
+                    tariff_domain.append(("billing_route_id", "=", PARTICULAR_ROUTE.id))
+                tariff = Tariff.search(tariff_domain, order="valid_from desc", limit=1)
+
+                role = Role.search([
+                    ("employee_id", "=", rec.practitioner_id.id),
                     ("location_id", "=", rec.location_id.id),
-                    ("can_perform", "=", True),
+                    ("active", "=", True),
                 ], limit=1)
-                if pp and pp.price_particular:
-                    rec.professional_extra_auto = pp.price_particular
-                    notes.append(f"Particular. Precio del profesional: ${pp.price_particular:,.2f}")
+                pct = role.particular_percentage if role else 100.0
+
+                if tariff and tariff.amount_paid_by_os:
+                    rec.tariff_id = tariff.id
+                    ref_price = tariff.amount_paid_by_os
+                    rec.professional_extra_auto = ref_price * pct / 100.0
+                    notes.append(
+                        f"Particular. Tarifa Colegio: ${ref_price:,.2f} × {pct:.0f}% = ${rec.professional_extra_auto:,.2f}"
+                    )
                 else:
-                    notes.append("Particular. El profesional no tiene precio cargado para esta práctica.")
+                    code = rec.practice_id.faco_code or rec.practice_id.name or "?"
+                    notes.append(f"⚠ Sin tarifa Colegio cargada para {code} al {ref_date}.")
 
                 rec.professional_extra_final = rec.professional_extra_override or rec.professional_extra_auto
                 rec.total_for_patient = rec.professional_extra_final + (rec.clinic_extra or 0.0)

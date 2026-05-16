@@ -51,11 +51,6 @@ class ClinicPractitionerPractice(models.Model):
         default=True,
         help="Marca si el profesional efectivamente realiza esta práctica en esta sede.",
     )
-    price_particular = fields.Float(
-        string="Precio particular ($)",
-        digits="Product Price",
-        help="Precio que cobra el profesional cuando el paciente es particular (sin obra social).",
-    )
     default_duration_minutes = fields.Integer(
         string="Duración (min)",
         help=(
