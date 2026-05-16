@@ -181,11 +181,16 @@ class HrEmployee(models.Model):
         return 30
 
     def get_resource_calendar_for_location(self, location):
-        """Returns the resource.calendar to use for this employee in a given sede.
+        """Returns the resource.calendar to use for this employee at a given sede.
 
-        Lookup order:
-        1. The active clinic.practitioner.role.resource_calendar_id for that location.
-        2. The employee's own resource_calendar_id (fallback).
+        Strict: returns the active role's resource_calendar_id for that location,
+        or False if the practitioner has no active role there.
+
+        NOTE: we intentionally do NOT fall back to self.resource_calendar_id
+        (the employee's default work calendar). A practitioner without a role
+        at a location should produce zero availability there — falling back
+        would otherwise leak the employee's default schedule into sedes where
+        they don't actually work.
         """
         self.ensure_one()
         role = self.env["clinic.practitioner.role"].search([
@@ -193,9 +198,7 @@ class HrEmployee(models.Model):
             ("location_id", "=", location.id),
             ("active", "=", True),
         ], limit=1)
-        if role and role.resource_calendar_id:
-            return role.resource_calendar_id
-        return self.resource_calendar_id
+        return role.resource_calendar_id or False
 
     def get_available_slots(self, date_from, date_to, duration_minutes, location, practice=None, step_minutes=15):
         """Returns a list of (start_dt, end_dt) tuples where the practitioner is available
