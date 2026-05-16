@@ -56,6 +56,8 @@ en este módulo.
         "data/clinic_tariff_avalian_data.xml",
         "data/clinic_bond_iapos_data.xml",
         "data/clinic_practice_code_os_data.xml",
+        "data/clinic_mail_templates.xml",
+        "data/clinic_cron_data.xml",
     ],
     "installable": True,
     "application": True,

@@ -221,6 +221,28 @@ class ClinicAppointment(models.Model):
     )
 
     # -------------------------------------------------------------------------
+    # Notification tracking flags (one per template, prevent duplicates)
+    # -------------------------------------------------------------------------
+    confirmation_sent = fields.Boolean(
+        string="Confirmación enviada", default=False, copy=False, tracking=True,
+    )
+    reminder_24h_sent = fields.Boolean(
+        string="Recordatorio 24h enviado", default=False, copy=False, tracking=True,
+    )
+    reminder_2h_sent = fields.Boolean(
+        string="Recordatorio 2h enviado", default=False, copy=False, tracking=True,
+    )
+    cancellation_sent = fields.Boolean(
+        string="Aviso cancelación enviado", default=False, copy=False, tracking=True,
+    )
+
+    whatsapp_message_preview = fields.Text(
+        string="Mensaje WhatsApp (copy/paste)",
+        compute="_compute_whatsapp_message_preview",
+        help="Texto pre-armado para copiar/pegar a WhatsApp Web mientras no haya Cloud API.",
+    )
+
+    # -------------------------------------------------------------------------
     # Display
     # -------------------------------------------------------------------------
     display_name = fields.Char(compute="_compute_display_name", store=True)
@@ -391,6 +413,122 @@ class ClinicAppointment(models.Model):
             when = fields.Datetime.context_timestamp(rec, rec.start_datetime).strftime("%d/%m %H:%M") if rec.start_datetime else "?"
             rec.display_name = f"{when} — {patient} con {prac}"
 
+    @api.depends(
+        "patient_id.name", "practitioner_id.name", "start_datetime",
+        "location_id.name", "location_id.street", "location_id.city",
+        "practice_id.name", "state",
+    )
+    def _compute_whatsapp_message_preview(self):
+        """Pre-built WhatsApp message for the secretary to copy/paste."""
+        for rec in self:
+            if not rec.start_datetime:
+                rec.whatsapp_message_preview = ""
+                continue
+            when = fields.Datetime.context_timestamp(rec, rec.start_datetime)
+            days_es = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+            day_label = days_es[when.weekday()]
+            date_label = when.strftime(f"{day_label} %d/%m")
+            time_label = when.strftime("%H:%M")
+            patient_name = (rec.patient_id.name or "").split()[0] or rec.patient_id.name or "paciente"
+            prac_name = rec.practitioner_id.name or "el profesional"
+            loc_name = rec.location_id.name or "la sede"
+            loc_address = ""
+            if rec.location_id.street:
+                loc_address = f" ({rec.location_id.street}"
+                if rec.location_id.city:
+                    loc_address += f", {rec.location_id.city}"
+                loc_address += ")"
+            rec.whatsapp_message_preview = (
+                f"Hola {patient_name}, te recordamos tu turno con {prac_name} "
+                f"el {date_label} a las {time_label} hs en {loc_name}{loc_address}. "
+                f"Cualquier cambio, avisanos. ¡Te esperamos!"
+            )
+
+    # -------------------------------------------------------------------------
+    # Email sending helpers (one per template)
+    # -------------------------------------------------------------------------
+    def _send_email_via_template(self, template_xmlid, flag_field, location_toggle_field):
+        """Generic helper: send email if location's toggle is on and patient has email.
+
+        Sets `flag_field` to True after sending to prevent duplicates.
+        Skips silently if no email or toggle off.
+        """
+        template = self.env.ref(f"clinic_core.{template_xmlid}", raise_if_not_found=False)
+        if not template:
+            return
+        for rec in self:
+            if getattr(rec, flag_field):
+                continue
+            if not rec.location_id or not getattr(rec.location_id, location_toggle_field):
+                continue
+            if not rec.patient_id.email:
+                continue
+            template.send_mail(rec.id, force_send=False, email_layout_xmlid="mail.mail_notification_light")
+            rec[flag_field] = True
+
+    def action_send_confirmation_email(self):
+        """Manual trigger from the form button."""
+        self._send_email_via_template(
+            "email_template_appointment_confirmation",
+            "confirmation_sent",
+            "send_confirmation_email",
+        )
+
+    def action_send_reminder_email(self):
+        """Manual trigger — sends the 24h template regardless of time."""
+        self._send_email_via_template(
+            "email_template_appointment_reminder_24h",
+            "reminder_24h_sent",
+            "send_reminder_24h_email",
+        )
+
+    # -------------------------------------------------------------------------
+    # Cron entry points (called by ir.cron, see data/clinic_cron_data.xml)
+    # -------------------------------------------------------------------------
+    @api.model
+    def _cron_send_reminders_24h(self):
+        """Send 24h reminders for tomorrow's appointments."""
+        from datetime import datetime as _dt
+        now = fields.Datetime.now()
+        # Tomorrow 00:00 to day-after 00:00 (in user's local view, but we use UTC naive)
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        end = start + timedelta(days=1)
+        domain = [
+            ("state", "in", ("pending", "booked", "checked-in")),
+            ("start_datetime", ">=", start),
+            ("start_datetime", "<", end),
+            ("reminder_24h_sent", "=", False),
+            ("location_id.send_reminder_24h_email", "=", True),
+        ]
+        appts = self.search(domain)
+        appts._send_email_via_template(
+            "email_template_appointment_reminder_24h",
+            "reminder_24h_sent",
+            "send_reminder_24h_email",
+        )
+        return len(appts)
+
+    @api.model
+    def _cron_send_reminders_2h(self):
+        """Send 2h reminders for appointments starting in 90-150 minutes."""
+        now = fields.Datetime.now()
+        start = now + timedelta(minutes=90)
+        end = now + timedelta(minutes=150)
+        domain = [
+            ("state", "in", ("pending", "booked", "checked-in")),
+            ("start_datetime", ">=", start),
+            ("start_datetime", "<=", end),
+            ("reminder_2h_sent", "=", False),
+            ("location_id.send_reminder_2h_email", "=", True),
+        ]
+        appts = self.search(domain)
+        appts._send_email_via_template(
+            "email_template_appointment_reminder_2h",
+            "reminder_2h_sent",
+            "send_reminder_2h_email",
+        )
+        return len(appts)
+
     # -------------------------------------------------------------------------
     # Onchanges
     # -------------------------------------------------------------------------
@@ -531,6 +669,12 @@ class ClinicAppointment(models.Model):
     # -------------------------------------------------------------------------
     def action_confirm(self):
         self._set_state("booked", from_states=("proposed", "pending"))
+        # Auto-send confirmation email after state change
+        self._send_email_via_template(
+            "email_template_appointment_confirmation",
+            "confirmation_sent",
+            "send_confirmation_email",
+        )
 
     def action_check_in(self):
         self._set_state("checked-in", from_states=("booked",))
@@ -553,6 +697,12 @@ class ClinicAppointment(models.Model):
         if reason:
             vals["cancellation_reason"] = reason
         self.write(vals)
+        # Auto-send cancellation email
+        self._send_email_via_template(
+            "email_template_appointment_cancellation",
+            "cancellation_sent",
+            "send_cancellation_email",
+        )
         return True
 
     def action_reset_to_pending(self):

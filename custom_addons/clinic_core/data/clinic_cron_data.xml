@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- Daily cron: send 24h reminders at 9:00 AM (Buenos Aires)     -->
+        <!-- ============================================================ -->
+        <record id="ir_cron_appointment_reminder_24h" model="ir.cron">
+            <field name="name">Clínica: enviar recordatorios 24h</field>
+            <field name="model_id" ref="model_clinic_appointment"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_reminders_24h()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+            <field name="nextcall" eval="(DateTime.now().replace(hour=12, minute=0, second=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Hourly cron: send 2h reminders every 30 min                  -->
+        <!-- ============================================================ -->
+        <record id="ir_cron_appointment_reminder_2h" model="ir.cron">
+            <field name="name">Clínica: enviar recordatorios 2h</field>
+            <field name="model_id" ref="model_clinic_appointment"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_reminders_2h()</field>
+            <field name="interval_number">30</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

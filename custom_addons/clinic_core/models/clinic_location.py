@@ -67,6 +67,28 @@ class ClinicLocation(models.Model):
     active = fields.Boolean(default=True, tracking=True)
     notes = fields.Text(string="Notas operativas")
 
+    # ---- Notification toggles per sede ----
+    send_confirmation_email = fields.Boolean(
+        string="Confirmación al agendar",
+        default=True,
+        help="Si está activado, al confirmar un turno en esta sede se envía email de confirmación al paciente.",
+    )
+    send_reminder_24h_email = fields.Boolean(
+        string="Recordatorio 24h antes",
+        default=True,
+        help="Si está activado, el cron diario envía recordatorio a los pacientes con turno al día siguiente en esta sede.",
+    )
+    send_reminder_2h_email = fields.Boolean(
+        string="Recordatorio 2h antes",
+        default=True,
+        help="Si está activado, un cron horario envía recordatorio a los pacientes con turno en las próximas 2 horas en esta sede.",
+    )
+    send_cancellation_email = fields.Boolean(
+        string="Aviso de cancelación",
+        default=True,
+        help="Si está activado, al cancelar un turno en esta sede se envía aviso al paciente.",
+    )
+
     # ---- Reverse relations for smart buttons ----
     practitioner_role_ids = fields.One2many(
         comodel_name="clinic.practitioner.role",

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- 1. Confirmación al agendar                                   -->
+        <!-- ============================================================ -->
+        <record id="email_template_appointment_confirmation" model="mail.template">
+            <field name="name">Clínica: confirmación de turno</field>
+            <field name="model_id" ref="model_clinic_appointment"/>
+            <field name="subject">Confirmación de tu turno en {{ object.location_id.name or '' }}</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.patient_id.email }}</field>
+            <field name="lang">es_AR</field>
+            <field name="body_html" type="html">
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+    <p>Hola <t t-out="object.patient_id.name"/>,</p>
+    <p>Te confirmamos tu turno:</p>
+    <ul>
+        <li><strong>Profesional:</strong> <t t-out="object.practitioner_id.name"/></li>
+        <li><strong>Fecha y hora:</strong>
+            <t t-out="format_datetime(object.start_datetime, tz='America/Argentina/Buenos_Aires', dt_format='EEEE d MMMM, HH:mm')"/> hs
+        </li>
+        <li><strong>Sede:</strong> <t t-out="object.location_id.name"/></li>
+        <li t-if="object.location_id.street">
+            <strong>Dirección:</strong>
+            <t t-out="object.location_id.street"/>,
+            <t t-out="object.location_id.city or ''"/>
+        </li>
+        <li t-if="object.practice_id">
+            <strong>Práctica:</strong> <t t-out="object.practice_id.name"/>
+        </li>
+    </ul>
+    <p>Si necesitás cancelar o reprogramar, por favor avisanos con anticipación.</p>
+    <p>¡Te esperamos!</p>
+</div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 2. Recordatorio 24h antes                                    -->
+        <!-- ============================================================ -->
+        <record id="email_template_appointment_reminder_24h" model="mail.template">
+            <field name="name">Clínica: recordatorio 24h antes</field>
+            <field name="model_id" ref="model_clinic_appointment"/>
+            <field name="subject">Recordatorio: turno mañana en {{ object.location_id.name or '' }}</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.patient_id.email }}</field>
+            <field name="lang">es_AR</field>
+            <field name="body_html" type="html">
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+    <p>Hola <t t-out="object.patient_id.name"/>,</p>
+    <p>Te recordamos que tenés turno <strong>mañana</strong>:</p>
+    <ul>
+        <li><strong>Hora:</strong>
+            <t t-out="format_datetime(object.start_datetime, tz='America/Argentina/Buenos_Aires', dt_format='HH:mm')"/> hs
+        </li>
+        <li><strong>Profesional:</strong> <t t-out="object.practitioner_id.name"/></li>
+        <li><strong>Sede:</strong> <t t-out="object.location_id.name"/></li>
+        <li t-if="object.location_id.street">
+            <strong>Dirección:</strong>
+            <t t-out="object.location_id.street"/>,
+            <t t-out="object.location_id.city or ''"/>
+        </li>
+    </ul>
+    <p>Si no podés asistir, avisanos lo antes posible.</p>
+</div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 3. Recordatorio 2h antes                                     -->
+        <!-- ============================================================ -->
+        <record id="email_template_appointment_reminder_2h" model="mail.template">
+            <field name="name">Clínica: recordatorio 2h antes</field>
+            <field name="model_id" ref="model_clinic_appointment"/>
+            <field name="subject">Recordatorio: turno hoy a las {{ object.start_datetime.strftime('%H:%M') if object.start_datetime else '' }} hs</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.patient_id.email }}</field>
+            <field name="lang">es_AR</field>
+            <field name="body_html" type="html">
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+    <p>Hola <t t-out="object.patient_id.name"/>,</p>
+    <p>Te recordamos que tenés turno <strong>hoy</strong> en aprox. 2 horas:</p>
+    <ul>
+        <li><strong>Hora:</strong>
+            <t t-out="format_datetime(object.start_datetime, tz='America/Argentina/Buenos_Aires', dt_format='HH:mm')"/> hs
+        </li>
+        <li><strong>Profesional:</strong> <t t-out="object.practitioner_id.name"/></li>
+        <li><strong>Sede:</strong> <t t-out="object.location_id.name"/></li>
+    </ul>
+    <p>¡Te esperamos!</p>
+</div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 4. Aviso de cancelación                                      -->
+        <!-- ============================================================ -->
+        <record id="email_template_appointment_cancellation" model="mail.template">
+            <field name="name">Clínica: aviso de cancelación</field>
+            <field name="model_id" ref="model_clinic_appointment"/>
+            <field name="subject">Tu turno fue cancelado</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.patient_id.email }}</field>
+            <field name="lang">es_AR</field>
+            <field name="body_html" type="html">
+<div style="font-family:Arial,sans-serif;font-size:14px;color:#333;">
+    <p>Hola <t t-out="object.patient_id.name"/>,</p>
+    <p>Te informamos que tu turno fue <strong>cancelado</strong>:</p>
+    <ul>
+        <li><strong>Profesional:</strong> <t t-out="object.practitioner_id.name"/></li>
+        <li><strong>Fecha y hora:</strong>
+            <t t-out="format_datetime(object.start_datetime, tz='America/Argentina/Buenos_Aires', dt_format='EEEE d MMMM, HH:mm')"/> hs
+        </li>
+        <li><strong>Sede:</strong> <t t-out="object.location_id.name"/></li>
+        <li t-if="object.cancellation_reason">
+            <strong>Motivo:</strong> <t t-out="object.cancellation_reason"/>
+        </li>
+    </ul>
+    <p>Para reagendar, comunicate con nosotros.</p>
+</div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

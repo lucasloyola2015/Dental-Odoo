@@ -77,6 +77,18 @@
                                     </group>
                                 </group>
                             </page>
+                            <page string="Notificaciones" name="notifications">
+                                <div class="text-muted mb-2">
+                                    Elegí qué emails automáticos se envían a los pacientes que tienen turno en esta sede.
+                                    Si una opción está desactivada, el sistema no envía ese tipo de mensaje (ni manual ni desde cron).
+                                </div>
+                                <group>
+                                    <field name="send_confirmation_email"/>
+                                    <field name="send_reminder_24h_email"/>
+                                    <field name="send_reminder_2h_email"/>
+                                    <field name="send_cancellation_email"/>
+                                </group>
+                            </page>
                             <page string="Notas" name="notes">
                                 <field name="notes" nolabel="1"
                                        placeholder="Particularidades operativas de la sede. Ej: 'Solo atiende mañanas', 'Comparte cocina con vecino'."/>
