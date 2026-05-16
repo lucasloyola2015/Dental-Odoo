@@ -177,12 +177,13 @@ class ClinicLocation(models.Model):
         }
 
     def action_view_appointments(self):
-        """Open the appointments scheduled at this sede."""
+        """Open the appointments scheduled at this sede, defaulting to calendar view."""
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("clinic_core.action_clinic_appointment")
         action.update({
-            "name": _("Turnos — %s") % self.display_name,
+            "name": _("Agenda — %s") % self.display_name,
             "domain": [("location_id", "=", self.id)],
             "context": {"default_location_id": self.id, "search_default_filter_upcoming": 0},
+            "view_mode": "calendar,list,form",
         })
         return action
