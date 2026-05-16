@@ -67,6 +67,28 @@ class ClinicLocation(models.Model):
     active = fields.Boolean(default=True, tracking=True)
     notes = fields.Text(string="Notas operativas")
 
+    # ---- Reverse relations for smart buttons ----
+    practitioner_role_ids = fields.One2many(
+        comodel_name="clinic.practitioner.role",
+        inverse_name="location_id",
+        string="Roles en esta sede",
+    )
+    appointment_ids = fields.One2many(
+        comodel_name="clinic.appointment",
+        inverse_name="location_id",
+        string="Turnos en esta sede",
+    )
+    practitioner_count = fields.Integer(
+        string="Profesionales",
+        compute="_compute_smart_counts",
+        help="Cantidad de profesionales con rol activo en esta sede.",
+    )
+    appointment_count = fields.Integer(
+        string="Turnos",
+        compute="_compute_smart_counts",
+        help="Cantidad total de turnos cargados en esta sede.",
+    )
+
     # ---- Related fields from partner_id (for the form ergonomics) ----
     street = fields.Char(related="partner_id.street", readonly=False)
     street2 = fields.Char(related="partner_id.street2", readonly=False)
@@ -125,3 +147,42 @@ class ClinicLocation(models.Model):
                 if rec.partner_id and rec.partner_id.name != rec.name:
                     rec.partner_id.name = rec.name
         return res
+
+    # -------------------------------------------------------------------------
+    # Smart buttons
+    # -------------------------------------------------------------------------
+    @api.depends("practitioner_role_ids", "appointment_ids")
+    def _compute_smart_counts(self):
+        Role = self.env["clinic.practitioner.role"]
+        Appt = self.env["clinic.appointment"]
+        for rec in self:
+            rec.practitioner_count = Role.search_count([
+                ("location_id", "=", rec.id),
+                ("active", "=", True),
+            ])
+            rec.appointment_count = Appt.search_count([
+                ("location_id", "=", rec.id),
+            ])
+
+    def action_view_practitioners(self):
+        """Open the list of practitioners working at this sede (via their roles)."""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Profesionales — %s") % self.display_name,
+            "res_model": "clinic.practitioner.role",
+            "view_mode": "list,form",
+            "domain": [("location_id", "=", self.id)],
+            "context": {"default_location_id": self.id},
+        }
+
+    def action_view_appointments(self):
+        """Open the appointments scheduled at this sede."""
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("clinic_core.action_clinic_appointment")
+        action.update({
+            "name": _("Turnos — %s") % self.display_name,
+            "domain": [("location_id", "=", self.id)],
+            "context": {"default_location_id": self.id, "search_default_filter_upcoming": 0},
+        })
+        return action
