@@ -48,11 +48,11 @@ Cómo se aterriza el dominio del proyecto en Odoo 19. Cerradas con el usuario. C
 
 ---
 
-## E — Sede física: postponer en V1
-- En V1 cada `res.company` tiene 1 sede modelada con sus campos de address (no hay modelo `clinic.clinic` propio).
-- Cuando aparezca multi-sede dentro de la misma company (V2), se evalúa modelo propio.
+## E — Sede física: `clinic.location` (resuelto 2026-05-16, ver decisión P)
+- ~~En V1 cada `res.company` tiene 1 sede modelada con sus campos de address.~~
+- **Reabierto y resuelto**: el caso de uso de Lucas es multi-sede física dentro de UNA misma empresa legal (mismo CUIT). Se modeló `clinic.location` — ver decisión P.
 
-**Why:** YAGNI.
+**Why:** El uso real exige distinguir sedes; profesionales con horarios distintos por sede; turnos atados a sede.
 
 ---
 
@@ -140,6 +140,39 @@ Cómo se aterriza el dominio del proyecto en Odoo 19. Cerradas con el usuario. C
 - Sin `end_date` ni `end_reason` (archivar con `active=False`).
 - `start_date` readonly, default `context_today`, mostrar como etiqueta gris bajo el nombre.
 - `age` computed (non-stored) desde `birthdate`.
+
+---
+
+## P — Multi-sede física: `clinic.location` (2026-05-16)
+
+Caso de uso: una sola empresa legal (`res.company`) con N sucursales físicas. Un profesional puede trabajar en varias sedes con horarios distintos. Esto **reemplaza la decisión E original**.
+
+### Modelo
+- **`clinic.location`** (modelo nuevo): `name`, `code`, `company_id` (req), `partner_id` (auto-create al guardar — guarda address/phone/email), `billing_route_id` (req — asociación regional), `sequence`, `active`, `notes`.
+- Patrón Odoo: `stock.warehouse`/`pos.config` usan `partner_id` para address. Patrón FHIR: `Organization 1..* Location`.
+- UNIQUE `(code, company_id)`.
+
+### Asociaciones regionales (AOSS, ASOR, etc.)
+- **Ya estaban modeladas como `clinic.billing.route`**. La novedad es el **vínculo sede → asociación**: `location.billing_route_id` required.
+- Las tarifas (`clinic.tariff`) siguen colgando de `(OS, billing_route, practice)` per-company. Llegan a una sede via `location → billing_route → tariffs`. **No se agregó `location_id` a `tariff`** — pricing se resuelve por transitividad.
+
+### Modelos refactorizados (`company_id` → `location_id`)
+| Modelo | Cambio |
+|---|---|
+| `clinic.practitioner.role` | `location_id` required. UNIQUE pasa a `(employee, location)`. `company_id` queda como `related="location_id.company_id"` stored para compat. |
+| `clinic.practitioner.practice` | `location_id` required. UNIQUE pasa a `(employee, practice, location)`. Precio particular puede variar por sede. |
+| `clinic.appointment` | `location_id` required. Overlap check ahora es por `(practitioner, location)` — no cross-location. Default `billing_route_id` = `location.billing_route_id`. |
+| `hr.employee.get_resource_calendar_for_company(company)` | Renombrado a `get_resource_calendar_for_location(location)`. |
+| `hr.employee.get_available_slots(...)` | Parámetro `company` → `location`. Filtro de busy slots por `location_id`. |
+
+### Modelos que NO cambian
+- `clinic.patient`, `clinic.patient.coverage`: per-company (el paciente es de la organización entera, puede atenderse en cualquier sede).
+- `clinic.tariff`, `clinic.copayment`, `clinic.bond.system`, `clinic.billing.route`, `clinic.health.insurance`, `clinic.insurance.route`, `clinic.practice`, `clinic.specialty`, `clinic.practice.code.os`: catálogos administrativos/legales, per-company o compartidos.
+
+### Demo data
+Cargado por `scripts/load_demo_data.py`: 2 sedes — **ROL** (Roldán Centro, AOSS) y **FUN** (Funes, ASOR). Dra. Tenaglia atiende en ambas con horarios distintos (ROL 9-13/14-18, FUN 10-13/15-19). Dr. Soto solo en ROL. Dra. Cardozo solo en FUN.
+
+**Why:** matchea el dominio real (misma empresa, múltiples consultorios), no abusa `res.company` (que es entidad contable). Asociaciones regionales por sede sale gratis del `billing_route_id` ya modelado. Tarifas no se duplican.
 
 ---
 

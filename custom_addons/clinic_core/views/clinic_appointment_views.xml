@@ -16,6 +16,7 @@
                     <field name="duration_minutes" optional="hide"/>
                     <field name="patient_id"/>
                     <field name="practitioner_id"/>
+                    <field name="location_id" optional="show"/>
                     <field name="practice_id" optional="show"/>
                     <field name="coverage_id" optional="show"/>
                     <field name="is_overbooking" widget="boolean_toggle" optional="hide"/>
@@ -75,7 +76,8 @@
                                 <field name="duration_minutes"/>
                                 <field name="end_datetime" readonly="1"/>
                                 <field name="is_overbooking"/>
-                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                <field name="location_id" options="{'no_create': True}"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                         </group>
                         <notebook>
@@ -128,6 +130,7 @@
                     <field name="patient_id"/>
                     <field name="practitioner_id"/>
                     <field name="practice_id"/>
+                    <field name="location_id"/>
                     <field name="state"/>
                     <separator/>
                     <filter name="filter_today" string="Hoy"
@@ -153,6 +156,7 @@
                         <filter name="group_by_state" string="Estado" domain="[]" context="{'group_by': 'state'}"/>
                         <filter name="group_by_practitioner" string="Profesional" domain="[]" context="{'group_by': 'practitioner_id'}"/>
                         <filter name="group_by_patient" string="Paciente" domain="[]" context="{'group_by': 'patient_id'}"/>
+                        <filter name="group_by_location" string="Sucursal" domain="[]" context="{'group_by': 'location_id'}"/>
                         <filter name="group_by_date" string="Fecha" domain="[]" context="{'group_by': 'start_datetime:day'}"/>
                     </group>
                 </search>

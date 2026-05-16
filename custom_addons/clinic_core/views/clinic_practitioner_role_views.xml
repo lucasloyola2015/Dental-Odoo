@@ -6,14 +6,28 @@
             <field name="name">clinic.practitioner.role.list</field>
             <field name="model">clinic.practitioner.role</field>
             <field name="arch" type="xml">
-                <list string="Roles por clínica">
+                <list string="Roles por sede">
                     <field name="employee_id"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="resource_calendar_id"/>
-                    <field name="accepted_insurance_ids" widget="many2many_tags" optional="show"/>
-                    <field name="billing_route_ids" widget="many2many_tags" optional="hide"/>
-                    <field name="valid_from"/>
-                    <field name="valid_to" optional="hide"/>
+                    <field name="location_id"/>
+                    <button name="action_open_schedule" type="object"
+                            string="📅 Editar horarios"
+                            class="btn-link"/>
+                    <field name="allowed_route_ids" column_invisible="True"/>
+                    <field name="routing_mode" column_invisible="True"/>
+                    <field name="assigned_route_id" string="Modalidad"
+                           options="{'no_create': True, 'no_open': True}"
+                           domain="[('id', 'in', allowed_route_ids)]"/>
+                    <field name="available_insurance_ids" column_invisible="True"/>
+                    <field name="excluded_insurance_ids" widget="many2many_tags"
+                           string="OS excluidas"
+                           domain="[('id', 'in', available_insurance_ids)]"
+                           readonly="routing_mode != 'association'"
+                           optional="show"/>
+                    <field name="effective_billing_route_id" string="Vía efectiva" optional="hide"/>
+                    <field name="valid_from" optional="hide"/>
+                    <field name="valid_to" string="Vigencia hasta"/>
+                    <field name="resource_calendar_id" optional="hide"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                     <field name="active" widget="boolean_toggle"/>
                 </list>
             </field>
@@ -23,29 +37,55 @@
             <field name="name">clinic.practitioner.role.form</field>
             <field name="model">clinic.practitioner.role</field>
             <field name="arch" type="xml">
-                <form string="Rol por clínica">
+                <form string="Rol por sede">
+                    <header>
+                        <button name="action_open_schedule" type="object"
+                                string="📅 Editar horarios"
+                                class="oe_highlight"/>
+                    </header>
                     <sheet>
                         <field name="active" invisible="1"/>
                         <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
                         <group>
                             <group>
                                 <field name="employee_id" options="{'no_create': True}"/>
-                                <field name="company_id" options="{'no_create': True}"/>
+                                <field name="location_id" options="{'no_create': True}"/>
                                 <field name="resource_calendar_id" options="{'no_create': True}"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                             <group>
                                 <field name="valid_from"/>
-                                <field name="valid_to"/>
+                                <field name="valid_to" string="Vigencia hasta"/>
                                 <field name="calendar_color" widget="color"/>
                                 <field name="gcal_calendar_id"/>
                             </group>
                         </group>
                         <notebook>
-                            <page string="Obras sociales" name="insurance">
-                                <field name="accepted_insurance_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                            </page>
-                            <page string="Vías de facturación" name="routes">
-                                <field name="billing_route_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <page string="Configuración OS" name="insurance">
+                                <group>
+                                    <group>
+                                        <field name="allowed_route_ids" invisible="1"/>
+                                        <field name="routing_mode" invisible="1"/>
+                                        <field name="assigned_route_id"
+                                               options="{'no_create': True, 'no_open': True}"
+                                               domain="[('id', 'in', allowed_route_ids)]"/>
+                                        <field name="effective_billing_route_id" readonly="1"
+                                               invisible="routing_mode != 'association'"/>
+                                    </group>
+                                </group>
+                                <field name="available_insurance_ids" invisible="1"/>
+                                <separator string="OS que NO acepta" invisible="routing_mode != 'association'"/>
+                                <field name="excluded_insurance_ids" widget="many2many_tags"
+                                       options="{'no_create': True}"
+                                       domain="[('id', 'in', available_insurance_ids)]"
+                                       invisible="routing_mode != 'association'"/>
+                                <separator string="OS efectivas (derivadas)" invisible="routing_mode != 'association'"/>
+                                <field name="effective_insurance_ids" widget="many2many_tags"
+                                       readonly="1"
+                                       invisible="routing_mode != 'association'"/>
+                                <div class="text-muted mt-2" invisible="routing_mode == 'association'">
+                                    Este profesional <strong>solo atiende particular</strong> en esta sede.
+                                </div>
                             </page>
                             <page string="Notas" name="notes">
                                 <field name="notes" nolabel="1"/>
@@ -63,21 +103,23 @@
             <field name="arch" type="xml">
                 <search>
                     <field name="employee_id"/>
-                    <field name="company_id"/>
-                    <field name="accepted_insurance_ids"/>
+                    <field name="location_id"/>
+                    <field name="effective_insurance_ids"/>
                     <separator/>
+                    <filter name="filter_no_association" string="Solo particular"
+                            domain="[('routing_mode', '=', 'particular')]"/>
                     <filter name="filter_archived" string="Archivados" domain="[('active', '=', False)]"/>
                     <separator/>
                     <group>
                         <filter name="group_by_employee" string="Profesional" domain="[]" context="{'group_by': 'employee_id'}"/>
-                        <filter name="group_by_company" string="Compañía" domain="[]" context="{'group_by': 'company_id'}"/>
+                        <filter name="group_by_location" string="Sucursal" domain="[]" context="{'group_by': 'location_id'}"/>
                     </group>
                 </search>
             </field>
         </record>
 
         <record id="action_clinic_practitioner_role" model="ir.actions.act_window">
-            <field name="name">Roles por clínica</field>
+            <field name="name">Roles por sede</field>
             <field name="res_model">clinic.practitioner.role</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_clinic_practitioner_role_search"/>
@@ -85,7 +127,7 @@
 
         <menuitem
             id="menu_clinic_practitioner_role"
-            name="Roles por clínica"
+            name="Roles por sede"
             parent="menu_clinic_configuration"
             action="action_clinic_practitioner_role"
             sequence="100"/>

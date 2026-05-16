@@ -9,6 +9,13 @@
             <field name="observations">Facturación directa al paciente (particular) o emisión propia.</field>
         </record>
 
+        <record id="billing_route_particular" model="clinic.billing.route">
+            <field name="code">PARTICULAR</field>
+            <field name="name">Solo Particular</field>
+            <field name="requires_membership">False</field>
+            <field name="observations">Modalidad de atención exclusivamente particular — el profesional no atiende OS en la sede donde se asigna esta opción.</field>
+        </record>
+
         <record id="billing_route_asor" model="clinic.billing.route">
             <field name="code">ASOR</field>
             <field name="name">ASOR (Rosario)</field>

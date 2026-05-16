@@ -54,13 +54,32 @@ class ClinicAppointment(models.Model):
         ondelete="restrict",
         tracking=True,
     )
+    location_id = fields.Many2one(
+        comodel_name="clinic.location",
+        string="Sucursal",
+        required=True,
+        ondelete="restrict",
+        index=True,
+        tracking=True,
+        default=lambda self: self._default_location_id(),
+        help="Sede física donde ocurre el turno. Define la vía de facturación default y filtra availability slots.",
+    )
     company_id = fields.Many2one(
         comodel_name="res.company",
         string="Compañía",
-        required=True,
+        related="location_id.company_id",
+        store=True,
         index=True,
-        default=lambda self: self.env.company,
+        readonly=True,
     )
+
+    @api.model
+    def _default_location_id(self):
+        """Pick the first active location of the current company."""
+        return self.env["clinic.location"].search([
+            ("company_id", "=", self.env.company.id),
+            ("active", "=", True),
+        ], limit=1).id or False
 
     # -------------------------------------------------------------------------
     # Schedule
@@ -224,7 +243,7 @@ class ClinicAppointment(models.Model):
 
     @api.depends(
         "patient_id", "practitioner_id", "practice_id", "coverage_id",
-        "billing_route_id", "company_id", "start_datetime",
+        "billing_route_id", "location_id", "start_datetime",
         "professional_extra_override", "clinic_extra",
     )
     def _compute_valuation(self):
@@ -275,7 +294,7 @@ class ClinicAppointment(models.Model):
                 pp = PractPractice.search([
                     ("employee_id", "=", rec.practitioner_id.id),
                     ("practice_id", "=", rec.practice_id.id),
-                    ("company_id", "=", rec.company_id.id),
+                    ("location_id", "=", rec.location_id.id),
                     ("can_perform", "=", True),
                 ], limit=1)
                 if pp and pp.price_particular:
@@ -389,13 +408,45 @@ class ClinicAppointment(models.Model):
             if primary:
                 self.coverage_id = primary[0]
 
+    @api.onchange("location_id")
+    def _onchange_location_default_route(self):
+        """Default billing_route_id from the location's regional association."""
+        if self.location_id and not self.billing_route_id:
+            self.billing_route_id = self.location_id.billing_route_id
+
+    @api.onchange("practitioner_id", "location_id")
+    def _onchange_practitioner_route(self):
+        """Adjust billing_route based on the practitioner's role in this location.
+
+        If the role has routing_mode='particular', force billing_route to False.
+        Otherwise default to the role's effective route.
+        """
+        if not self.practitioner_id or not self.location_id:
+            return
+        role = self.env["clinic.practitioner.role"].search([
+            ("employee_id", "=", self.practitioner_id.id),
+            ("location_id", "=", self.location_id.id),
+            ("active", "=", True),
+        ], limit=1)
+        if not role:
+            return
+        if role.routing_mode == "particular":
+            self.billing_route_id = False
+        else:
+            self.billing_route_id = role.effective_billing_route_id
+
     # -------------------------------------------------------------------------
     # Constraints
     # -------------------------------------------------------------------------
-    @api.constrains("start_datetime", "end_datetime", "practitioner_id", "state", "is_overbooking", "company_id")
+    @api.constrains("start_datetime", "end_datetime", "practitioner_id", "state", "is_overbooking", "location_id")
     def _check_no_overlap(self):
-        """No two non-cancelled appointments can overlap for the same practitioner+company,
-        unless is_overbooking is True on at least one of them."""
+        """No two non-cancelled appointments can overlap for the same practitioner+location,
+        unless is_overbooking is True on at least one of them.
+
+        Note: overlap is per-location so a profesional puede tener un turno en Roldán
+        9:00-10:00 y otro en Funes 9:30-10:30 (físicamente imposible pero el modelo
+        no impide cross-location overlap — eso es responsabilidad del que agenda).
+        """
         blocking_states = ("pending", "booked", "checked-in", "arrived", "fulfilled")
         for rec in self:
             if rec.is_overbooking:
@@ -407,7 +458,7 @@ class ClinicAppointment(models.Model):
             conflict = self.search_count([
                 ("id", "!=", rec.id),
                 ("practitioner_id", "=", rec.practitioner_id.id),
-                ("company_id", "=", rec.company_id.id),
+                ("location_id", "=", rec.location_id.id),
                 ("is_overbooking", "=", False),
                 ("state", "in", blocking_states),
                 ("start_datetime", "<", rec.end_datetime),
@@ -415,9 +466,9 @@ class ClinicAppointment(models.Model):
             ])
             if conflict:
                 raise ValidationError(_(
-                    "El profesional %(prac)s ya tiene un turno superpuesto en ese horario. "
+                    "El profesional %(prac)s ya tiene un turno superpuesto en %(loc)s en ese horario. "
                     "Si querés ofrecer un sobreturno, marcá la casilla 'Sobreturno'."
-                ) % {"prac": rec.practitioner_id.name})
+                ) % {"prac": rec.practitioner_id.name, "loc": rec.location_id.display_name})
 
     @api.constrains("coverage_id", "patient_id")
     def _check_coverage_belongs_to_patient(self):
@@ -425,22 +476,55 @@ class ClinicAppointment(models.Model):
             if rec.coverage_id and rec.coverage_id.patient_id != rec.patient_id:
                 raise ValidationError(_("La cobertura seleccionada no pertenece al paciente del turno."))
 
-    @api.constrains("practitioner_id", "company_id")
-    def _check_practitioner_role_in_company(self):
-        """The practitioner must have an active role in the appointment's company."""
+    @api.constrains("practitioner_id", "location_id")
+    def _check_practitioner_role_in_location(self):
+        """The practitioner must have an active role in the appointment's location."""
         for rec in self:
-            if not rec.practitioner_id or not rec.company_id:
+            if not rec.practitioner_id or not rec.location_id:
                 continue
             role = self.env["clinic.practitioner.role"].search([
                 ("employee_id", "=", rec.practitioner_id.id),
-                ("company_id", "=", rec.company_id.id),
+                ("location_id", "=", rec.location_id.id),
                 ("active", "=", True),
             ], limit=1)
             if not role:
                 raise ValidationError(_(
-                    "El profesional %(prac)s no tiene un rol activo en la compañía %(comp)s. "
+                    "El profesional %(prac)s no tiene un rol activo en la sede %(loc)s. "
                     "Cargá el rol en su ficha antes de agendar."
-                ) % {"prac": rec.practitioner_id.name, "comp": rec.company_id.name})
+                ) % {"prac": rec.practitioner_id.name, "loc": rec.location_id.display_name})
+
+    @api.constrains("practitioner_id", "location_id", "coverage_id")
+    def _check_coverage_vs_role_routing(self):
+        """If the practitioner role at this location is particular-only
+        (routing_mode='particular'), reject appointments with coverage_id.
+
+        Also reject coverage if its OS is in the role's excluded_insurance_ids.
+        """
+        for rec in self:
+            if not (rec.practitioner_id and rec.location_id and rec.coverage_id):
+                continue
+            role = self.env["clinic.practitioner.role"].search([
+                ("employee_id", "=", rec.practitioner_id.id),
+                ("location_id", "=", rec.location_id.id),
+                ("active", "=", True),
+            ], limit=1)
+            if not role:
+                continue
+            if role.routing_mode == "particular":
+                raise ValidationError(_(
+                    "El profesional %(prac)s solo atiende particular en la sede %(loc)s. "
+                    "Quitá la cobertura o agendá con otro profesional / sede."
+                ) % {"prac": rec.practitioner_id.name, "loc": rec.location_id.display_name})
+            insurance = rec.coverage_id.health_insurance_id
+            if insurance and insurance in role.excluded_insurance_ids:
+                raise ValidationError(_(
+                    "El profesional %(prac)s no atiende %(os)s en la sede %(loc)s "
+                    "(está en su lista de OS excluidas)."
+                ) % {
+                    "prac": rec.practitioner_id.name,
+                    "os": insurance.name,
+                    "loc": rec.location_id.display_name,
+                })
 
     # -------------------------------------------------------------------------
     # State transition actions

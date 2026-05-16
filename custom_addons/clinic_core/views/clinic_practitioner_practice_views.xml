@@ -9,10 +9,11 @@
                 <list string="Prácticas por profesional" multi_edit="1">
                     <field name="employee_id"/>
                     <field name="practice_id"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="location_id"/>
                     <field name="can_perform" widget="boolean_toggle"/>
                     <field name="default_duration_minutes"/>
                     <field name="price_particular"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                     <field name="active" widget="boolean_toggle"/>
                 </list>
             </field>
@@ -28,7 +29,8 @@
                             <group>
                                 <field name="employee_id" options="{'no_create': True}"/>
                                 <field name="practice_id" options="{'no_create': True}"/>
-                                <field name="company_id" options="{'no_create': True}"/>
+                                <field name="location_id" options="{'no_create': True}"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                             <group>
                                 <field name="can_perform"/>
@@ -50,12 +52,14 @@
                 <search>
                     <field name="employee_id"/>
                     <field name="practice_id"/>
+                    <field name="location_id"/>
                     <separator/>
                     <filter name="filter_can_perform" string="Realiza" domain="[('can_perform', '=', True)]"/>
                     <filter name="filter_archived" string="Archivados" domain="[('active', '=', False)]"/>
                     <group>
                         <filter name="group_by_employee" string="Profesional" domain="[]" context="{'group_by': 'employee_id'}"/>
                         <filter name="group_by_practice" string="Práctica" domain="[]" context="{'group_by': 'practice_id'}"/>
+                        <filter name="group_by_location" string="Sucursal" domain="[]" context="{'group_by': 'location_id'}"/>
                     </group>
                 </search>
             </field>

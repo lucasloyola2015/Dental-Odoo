@@ -63,12 +63,20 @@ class ClinicAppointmentWizard(models.TransientModel):
         help="Si está marcado, el turno final se carga como sobreturno (no validar superposición).",
     )
     appointment_reason = fields.Text(string="Motivo de consulta")
-    company_id = fields.Many2one(
-        comodel_name="res.company",
-        string="Compañía",
+    location_id = fields.Many2one(
+        comodel_name="clinic.location",
+        string="Sucursal",
         required=True,
-        default=lambda self: self.env.company,
+        default=lambda self: self._default_location_id(),
+        help="Sede física donde se va a buscar disponibilidad y crear el turno.",
     )
+
+    @api.model
+    def _default_location_id(self):
+        return self.env["clinic.location"].search([
+            ("company_id", "=", self.env.company.id),
+            ("active", "=", True),
+        ], limit=1).id or False
 
     # -------------------------------------------------------------------------
     # Output / state
@@ -144,7 +152,7 @@ class ClinicAppointmentWizard(models.TransientModel):
             date_from=date_from_dt,
             date_to=date_to_dt,
             duration_minutes=self.duration_minutes,
-            company=self.company_id,
+            location=self.location_id,
             practice=self.practice_id or None,
             step_minutes=self.step_minutes or 15,
         )
@@ -237,13 +245,13 @@ class ClinicAppointmentWizardSlot(models.TransientModel):
             "practitioner_id": w.practitioner_id.id,
             "practice_id": w.practice_id.id if w.practice_id else False,
             "coverage_id": w.coverage_id.id if w.coverage_id else False,
-            "billing_route_id": w.billing_route_id.id if w.billing_route_id else False,
+            "billing_route_id": (w.billing_route_id or w.location_id.billing_route_id).id,
             "start_datetime": self.start_datetime,
             "duration_minutes": w.duration_minutes,
             "is_overbooking": w.is_overbooking,
             "appointment_reason": w.appointment_reason or False,
             "state": "pending",
-            "company_id": w.company_id.id,
+            "location_id": w.location_id.id,
         }
         appointment = self.env["clinic.appointment"].create(vals)
 

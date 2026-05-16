@@ -12,6 +12,9 @@ from . import clinic_tariff
 from . import clinic_bond_system
 from . import clinic_copayment
 from . import clinic_practice_code_os
+from . import clinic_location
+from . import resource_calendar
+from . import clinic_schedule_extra_day
 from . import clinic_practitioner_role
 from . import clinic_practitioner_practice
 from . import clinic_appointment

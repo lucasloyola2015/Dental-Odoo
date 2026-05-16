@@ -180,29 +180,29 @@ class HrEmployee(models.Model):
             return self.specialty_main_id.default_appointment_duration_minutes
         return 30
 
-    def get_resource_calendar_for_company(self, company):
-        """Returns the resource.calendar to use for this employee in a given company.
+    def get_resource_calendar_for_location(self, location):
+        """Returns the resource.calendar to use for this employee in a given sede.
 
         Lookup order:
-        1. The active clinic.practitioner.role.resource_calendar_id for that company.
+        1. The active clinic.practitioner.role.resource_calendar_id for that location.
         2. The employee's own resource_calendar_id (fallback).
         """
         self.ensure_one()
         role = self.env["clinic.practitioner.role"].search([
             ("employee_id", "=", self.id),
-            ("company_id", "=", company.id),
+            ("location_id", "=", location.id),
             ("active", "=", True),
         ], limit=1)
         if role and role.resource_calendar_id:
             return role.resource_calendar_id
         return self.resource_calendar_id
 
-    def get_available_slots(self, date_from, date_to, duration_minutes, company, practice=None, step_minutes=15):
+    def get_available_slots(self, date_from, date_to, duration_minutes, location, practice=None, step_minutes=15):
         """Returns a list of (start_dt, end_dt) tuples where the practitioner is available
-        for a `duration_minutes` appointment within [date_from, date_to].
+        for a `duration_minutes` appointment within [date_from, date_to] at `location`.
 
         Algorithm:
-        1. Get the resource.calendar for this employee in `company`.
+        1. Get the resource.calendar for this employee at `location`.
         2. Compute working intervals (respecting leaves).
         3. Subtract existing appointments (non-cancelled, non-noshow, non-errored) with buffer applied.
         4. Slide a window of `duration_minutes` every `step_minutes` and yield those that fit.
@@ -210,7 +210,7 @@ class HrEmployee(models.Model):
         :param date_from: datetime, start of search window (UTC naive)
         :param date_to: datetime, end of search window (UTC naive)
         :param duration_minutes: int, duration of the desired appointment
-        :param company: res.company record, the company context
+        :param location: clinic.location record, the sede context
         :param practice: clinic.practice record (optional) — used to refine duration via cascade
         :param step_minutes: granularity of candidate start times (default 15)
         :return: list of (datetime, datetime) tuples
@@ -219,7 +219,7 @@ class HrEmployee(models.Model):
         if practice:
             duration_minutes = self.get_default_appointment_duration(practice) or duration_minutes
 
-        calendar = self.get_resource_calendar_for_company(company)
+        calendar = self.get_resource_calendar_for_location(location)
         if not calendar:
             return []
 
@@ -249,7 +249,7 @@ class HrEmployee(models.Model):
         blocking_states = ("pending", "booked", "checked-in", "arrived", "fulfilled")
         existing = self.env["clinic.appointment"].search([
             ("practitioner_id", "=", self.id),
-            ("company_id", "=", company.id),
+            ("location_id", "=", location.id),
             ("state", "in", blocking_states),
             ("start_datetime", "<", dt_naive),
             ("end_datetime", ">", df_naive),

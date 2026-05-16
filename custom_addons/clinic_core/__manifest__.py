@@ -40,6 +40,8 @@ en este módulo.
         "views/clinic_insurance_route_views.xml",
         "views/clinic_practice_views.xml",
         "views/clinic_tariff_views.xml",
+        "views/clinic_location_views.xml",
+        "views/clinic_schedule_views.xml",
         "views/clinic_practitioner_role_views.xml",
         "views/clinic_practitioner_practice_views.xml",
         "views/clinic_appointment_views.xml",

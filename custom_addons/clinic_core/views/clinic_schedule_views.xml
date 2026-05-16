@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ============================================================ -->
+        <!-- Custom form of resource.calendar — modal with 3 tabs          -->
+        <!-- Used from clinic.practitioner.role.action_open_schedule()     -->
+        <!-- ============================================================ -->
+        <record id="view_clinic_schedule_calendar_form" model="ir.ui.view">
+            <field name="name">clinic.schedule.calendar.form</field>
+            <field name="model">resource.calendar</field>
+            <field name="priority">99</field>
+            <field name="arch" type="xml">
+                <form string="Horarios del profesional">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" string="Calendario"/>
+                            <h1>
+                                <field name="name" placeholder="Horario del profesional"/>
+                            </h1>
+                            <h3 class="text-muted">
+                                <field name="tz" class="oe_inline"/>
+                            </h3>
+                        </div>
+                        <notebook>
+                            <!-- =============================================== -->
+                            <!-- Tab 1: Routine grid                              -->
+                            <!-- =============================================== -->
+                            <page string="Grilla rutinaria" name="routine">
+                                <div class="text-muted mb-2">
+                                    Horarios semanales fijos. Cada línea es una franja: día + hora inicio + hora fin.
+                                    Desactivá una franja con el toggle para suspenderla sin borrarla.
+                                </div>
+                                <field name="attendance_ids" context="{'default_calendar_id': id}">
+                                    <list editable="bottom" string="Grilla">
+                                        <field name="dayofweek" string="Día"/>
+                                        <field name="hour_from" widget="float_time" string="Inicio"/>
+                                        <field name="hour_to" widget="float_time" string="Fin"/>
+                                        <field name="day_period" optional="hide"/>
+                                        <field name="active" widget="boolean_toggle" string="Activo"/>
+                                    </list>
+                                </field>
+                            </page>
+
+                            <!-- =============================================== -->
+                            <!-- Tab 1b: Visual weekly grid (read-only)           -->
+                            <!-- =============================================== -->
+                            <page string="Vista semanal" name="routine_visual">
+                                <div class="text-muted mb-2">
+                                    Visualización de la grilla rutinaria. Solo lectura — para editar, usá el tab "Grilla rutinaria".
+                                </div>
+                                <field name="routine_grid_html" nolabel="1" widget="html" readonly="1"/>
+                            </page>
+
+                            <!-- =============================================== -->
+                            <!-- Tab 2: Extra days                                -->
+                            <!-- =============================================== -->
+                            <page string="Días extras" name="extras">
+                                <div class="text-muted mb-2">
+                                    Días puntuales fuera de la grilla — ej. reemplazos. Cada línea es 1 día con horario propio.
+                                </div>
+                                <field name="extra_day_ids" context="{'default_calendar_id': id}">
+                                    <list editable="bottom" string="Días extras">
+                                        <field name="date" string="Fecha"/>
+                                        <field name="hour_from" widget="float_time" string="Inicio"/>
+                                        <field name="hour_to" widget="float_time" string="Fin"/>
+                                        <field name="name" string="Motivo"/>
+                                        <field name="active" widget="boolean_toggle" string="Activo"/>
+                                    </list>
+                                </field>
+                            </page>
+
+                            <!-- =============================================== -->
+                            <!-- Tab 3: Excluded periods (leaves)                 -->
+                            <!-- =============================================== -->
+                            <page string="Días excluidos" name="leaves">
+                                <div class="text-muted mb-2">
+                                    Períodos en los que el profesional NO atiende — vacaciones, feriados personales, etc.
+                                    Se ingresa día y hora de inicio, día y hora de fin.
+                                </div>
+                                <field name="leave_ids" context="{'default_calendar_id': id, 'default_time_type': 'leave'}">
+                                    <list editable="bottom" string="Días excluidos">
+                                        <field name="date_from" string="Desde"/>
+                                        <field name="date_to" string="Hasta"/>
+                                        <field name="name" string="Motivo"/>
+                                        <field name="time_type" optional="hide"/>
+                                        <field name="active" widget="boolean_toggle" string="Activo"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <footer>
+                        <button string="Guardar y cerrar" class="btn-primary" special="save"/>
+                        <button string="Descartar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- clinic.schedule.extra_day — standalone admin views (optional) -->
+        <!-- ============================================================ -->
+        <record id="view_clinic_schedule_extra_day_list" model="ir.ui.view">
+            <field name="name">clinic.schedule.extra_day.list</field>
+            <field name="model">clinic.schedule.extra_day</field>
+            <field name="arch" type="xml">
+                <list string="Días extras" editable="bottom">
+                    <field name="calendar_id"/>
+                    <field name="date"/>
+                    <field name="hour_from" widget="float_time"/>
+                    <field name="hour_to" widget="float_time"/>
+                    <field name="name" string="Motivo"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_schedule_extra_day_form" model="ir.ui.view">
+            <field name="name">clinic.schedule.extra_day.form</field>
+            <field name="model">clinic.schedule.extra_day</field>
+            <field name="arch" type="xml">
+                <form string="Día extra">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="calendar_id" options="{'no_create': True}"/>
+                                <field name="date"/>
+                                <field name="active"/>
+                            </group>
+                            <group>
+                                <field name="hour_from" widget="float_time"/>
+                                <field name="hour_to" widget="float_time"/>
+                                <field name="name" string="Motivo"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

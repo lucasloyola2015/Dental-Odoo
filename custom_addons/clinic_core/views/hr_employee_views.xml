@@ -23,17 +23,29 @@
                             </group>
                         </group>
                         <notebook>
-                            <page string="Roles por clínica" name="roles">
+                            <page string="Sedes y horarios" name="roles">
                                 <field name="practitioner_role_ids" context="{'default_employee_id': id}">
                                     <list editable="bottom">
-                                        <field name="company_id" options="{'no_create': True}"/>
-                                        <field name="resource_calendar_id" options="{'no_create': True}"/>
-                                        <field name="accepted_insurance_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                                        <field name="billing_route_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                        <field name="location_id" options="{'no_create': True}"/>
+                                        <button name="action_open_schedule" type="object"
+                                                string="📅 Editar horarios"
+                                                class="btn-link"/>
+                                        <field name="allowed_route_ids" column_invisible="True"/>
+                                        <field name="routing_mode" column_invisible="True"/>
+                                        <field name="assigned_route_id" string="Modalidad"
+                                               options="{'no_create': True, 'no_open': True}"
+                                               domain="[('id', 'in', allowed_route_ids)]"/>
+                                        <field name="available_insurance_ids" column_invisible="True"/>
+                                        <field name="excluded_insurance_ids" widget="many2many_tags"
+                                               options="{'no_create': True}"
+                                               string="OS que NO acepta"
+                                               domain="[('id', 'in', available_insurance_ids)]"
+                                               readonly="routing_mode != 'association'"/>
                                         <field name="calendar_color" widget="color" optional="hide"/>
                                         <field name="gcal_calendar_id" optional="hide"/>
                                         <field name="valid_from" optional="hide"/>
-                                        <field name="valid_to" optional="hide"/>
+                                        <field name="valid_to" string="Vigencia hasta"/>
+                                        <field name="resource_calendar_id" optional="hide"/>
                                         <field name="active" widget="boolean_toggle"/>
                                     </list>
                                 </field>
@@ -41,8 +53,8 @@
                             <page string="Prácticas que realiza" name="practices">
                                 <field name="practitioner_practice_ids" context="{'default_employee_id': id}">
                                     <list editable="bottom">
+                                        <field name="location_id" options="{'no_create': True}"/>
                                         <field name="practice_id" options="{'no_create': True}"/>
-                                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                         <field name="can_perform" widget="boolean_toggle"/>
                                         <field name="default_duration_minutes" string="Duración (min)"/>
                                         <field name="price_particular" string="Precio particular ($)"/>
@@ -66,13 +78,6 @@
                     <button name="action_view_appointments" type="object" class="oe_stat_button" icon="fa-calendar"
                             invisible="not is_clinic_practitioner or not appointment_count">
                         <field name="appointment_count" widget="statinfo" string="Turnos"/>
-                    </button>
-                    <button name="action_create_clinic_patient" type="object" class="oe_stat_button" icon="fa-medkit"
-                            invisible="not is_clinic_practitioner">
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Crear /</span>
-                            <span class="o_stat_text">ver como Paciente</span>
-                        </div>
                     </button>
                 </xpath>
             </field>
