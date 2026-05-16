@@ -101,9 +101,9 @@
         <menuitem
             id="menu_clinic_specialty"
             name="Especialidades"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_structure"
             action="action_clinic_specialty"
-            sequence="10"/>
+            sequence="20"/>
 
     </data>
 </odoo>

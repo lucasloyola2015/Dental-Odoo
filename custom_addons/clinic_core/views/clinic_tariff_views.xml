@@ -81,9 +81,9 @@
         <menuitem
             id="menu_clinic_tariff"
             name="Tarifas"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_tariff"
-            sequence="60"/>
+            sequence="40"/>
 
         <!-- Bond system -->
         <record id="view_clinic_bond_system_list" model="ir.ui.view">
@@ -135,9 +135,9 @@
         <menuitem
             id="menu_clinic_bond_system"
             name="Bonos"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_bond_system"
-            sequence="70"/>
+            sequence="50"/>
 
         <!-- Copayment -->
         <record id="view_clinic_copayment_list" model="ir.ui.view">
@@ -185,9 +185,9 @@
         <menuitem
             id="menu_clinic_copayment"
             name="Copagos"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_copayment"
-            sequence="80"/>
+            sequence="60"/>
 
         <!-- Practice code OS -->
         <record id="view_clinic_practice_code_os_list" model="ir.ui.view">
@@ -236,10 +236,10 @@
 
         <menuitem
             id="menu_clinic_practice_code_os"
-            name="Códigos OS"
-            parent="menu_clinic_configuration"
+            name="Códigos por OS"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_practice_code_os"
-            sequence="90"/>
+            sequence="70"/>
 
     </data>
 </odoo>

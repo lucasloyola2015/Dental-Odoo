@@ -15,5 +15,25 @@
             sequence="100"
             groups="clinic_core.group_clinic_admin"/>
 
+        <!-- Sub-carpetas de Configuración: agrupan los items por afinidad -->
+
+        <menuitem
+            id="menu_clinic_config_structure"
+            name="Estructura"
+            parent="menu_clinic_configuration"
+            sequence="10"/>
+
+        <menuitem
+            id="menu_clinic_config_insurance"
+            name="Obras sociales"
+            parent="menu_clinic_configuration"
+            sequence="20"/>
+
+        <menuitem
+            id="menu_clinic_config_assignment"
+            name="Asignación profesional"
+            parent="menu_clinic_configuration"
+            sequence="30"/>
+
     </data>
 </odoo>

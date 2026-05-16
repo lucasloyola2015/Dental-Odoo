@@ -91,10 +91,10 @@
 
         <menuitem
             id="menu_clinic_practice"
-            name="Prácticas (FACO)"
-            parent="menu_clinic_configuration"
+            name="Catálogo del Colegio (FACO)"
+            parent="menu_clinic_config_structure"
             action="action_clinic_practice"
-            sequence="20"/>
+            sequence="30"/>
 
     </data>
 </odoo>

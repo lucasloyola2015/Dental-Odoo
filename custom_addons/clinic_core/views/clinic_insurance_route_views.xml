@@ -76,10 +76,10 @@
 
         <menuitem
             id="menu_clinic_insurance_route"
-            name="OS / Vías (matriz)"
-            parent="menu_clinic_configuration"
+            name="Vías × OS (matriz)"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_insurance_route"
-            sequence="50"/>
+            sequence="30"/>
 
     </data>
 </odoo>

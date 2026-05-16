@@ -56,9 +56,9 @@
         <menuitem
             id="menu_clinic_billing_route"
             name="Vías de facturación"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_billing_route"
-            sequence="40"/>
+            sequence="20"/>
 
     </data>
 </odoo>

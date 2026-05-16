@@ -130,9 +130,9 @@
         <menuitem
             id="menu_clinic_practitioner_role"
             name="Roles por sede"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_assignment"
             action="action_clinic_practitioner_role"
-            sequence="100"/>
+            sequence="10"/>
 
     </data>
 </odoo>

@@ -73,9 +73,9 @@
         <menuitem
             id="menu_clinic_practitioner_practice"
             name="Prácticas por profesional"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_assignment"
             action="action_clinic_practitioner_practice"
-            sequence="110"/>
+            sequence="20"/>
 
     </data>
 </odoo>

@@ -67,10 +67,10 @@
 
         <menuitem
             id="menu_clinic_health_insurance"
-            name="Obras sociales"
-            parent="menu_clinic_configuration"
+            name="Listado de OS"
+            parent="menu_clinic_config_insurance"
             action="action_clinic_health_insurance"
-            sequence="30"/>
+            sequence="10"/>
 
     </data>
 </odoo>

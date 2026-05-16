@@ -147,7 +147,7 @@
         <menuitem
             id="menu_clinic_location"
             name="Sucursales"
-            parent="menu_clinic_configuration"
+            parent="menu_clinic_config_structure"
             action="action_clinic_location"
             sequence="10"/>
 
