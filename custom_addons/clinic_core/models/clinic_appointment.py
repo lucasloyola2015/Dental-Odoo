@@ -826,7 +826,7 @@ class ClinicAppointment(models.Model):
         domicilio = partner.street or ""
         localidad = partner.city or ""
         documento = partner.vat or ""
-        telefono = partner.mobile or partner.phone or ""
+        telefono = partner.phone or ""
 
         # Practitioner
         prac_name = practitioner.name or ""
