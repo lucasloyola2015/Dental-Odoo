@@ -4,13 +4,49 @@
 
         <!-- AVALIAN: códigos propios que difieren del Colegio -->
 
-        <record id="practice_code_avalian_cefalometria" model="clinic.practice.code.os">
+        <record id="practice_code_avalian_346027" model="clinic.practice.code.os">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
             <field name="practice_id" ref="practice_09_02_07"/>
             <field name="os_code">346027</field>
             <field name="os_name">Cefalometría</field>
             <field name="valid_from">2025-11-01</field>
             <field name="notes">AVALIAN usa código propio (346027) en lugar del código FACO 09.02.07.</field>
+        </record>
+
+        <record id="practice_code_avalian_346076" model="clinic.practice.code.os">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="practice_id" ref="practice_09_03_01"/>
+            <field name="os_code">346076</field>
+            <field name="os_name">TOMOGRAFIA CONE BEAN AMBOS MAXILARES</field>
+            <field name="valid_from">2025-11-01</field>
+            <field name="notes">AVALIAN usa código propio (346076) en lugar del código FACO 09.03.01.</field>
+        </record>
+
+        <record id="practice_code_avalian_346080" model="clinic.practice.code.os">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="practice_id" ref="practice_09_03_02"/>
+            <field name="os_code">346080</field>
+            <field name="os_name">TOMOGRAFIA CONE BEAN DE 1 A 3 PIEZAS DENTARIAS</field>
+            <field name="valid_from">2025-11-01</field>
+            <field name="notes">AVALIAN usa código propio (346080) en lugar del código FACO 09.03.02.</field>
+        </record>
+
+        <record id="practice_code_avalian_346078" model="clinic.practice.code.os">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="practice_id" ref="practice_09_03_03"/>
+            <field name="os_code">346078</field>
+            <field name="os_name">TOMOGRAFIA CONE BEAN POR SECTOR (HASTA 6 PIEZAS)</field>
+            <field name="valid_from">2025-11-01</field>
+            <field name="notes">AVALIAN usa código propio (346078) en lugar del código FACO 09.03.03.</field>
+        </record>
+
+        <record id="practice_code_avalian_346077" model="clinic.practice.code.os">
+            <field name="health_insurance_id" ref="health_insurance_avalian"/>
+            <field name="practice_id" ref="practice_09_03_04"/>
+            <field name="os_code">346077</field>
+            <field name="os_name">TOMOGRAFIA CONE BEAN 1 SOLO MAXILAR COMPLETO</field>
+            <field name="valid_from">2025-11-01</field>
+            <field name="notes">AVALIAN usa código propio (346077) en lugar del código FACO 09.03.04.</field>
         </record>
 
     </data>

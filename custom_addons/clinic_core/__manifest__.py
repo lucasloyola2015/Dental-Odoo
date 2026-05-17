@@ -55,6 +55,7 @@ en este módulo.
         "data/clinic_practice_data.xml",
         "data/clinic_tariff_avalian_data.xml",
         "data/clinic_tariff_particular_data.xml",
+        "data/clinic_copayment_avalian_data.xml",
         "data/clinic_bond_iapos_data.xml",
         "data/clinic_practice_code_os_data.xml",
         "data/clinic_mail_templates.xml",

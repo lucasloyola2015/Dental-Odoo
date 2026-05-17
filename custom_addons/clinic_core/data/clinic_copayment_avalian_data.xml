@@ -2,359 +2,315 @@
 <odoo>
     <data noupdate="0">
 
-        <!-- AVALIAN tarifa vía AOSS — Vigencia 01/11/2025
-             Lo que paga AVALIAN al profesional/AOSS por cada práctica.
-             Co-pago del paciente vive en clinic_copayment_avalian_data.xml. -->
+        <!-- AVALIAN copagos — Vigencia 01/11/2025
+             "A cargo del socio" según la grilla AVALIAN: lo que paga el paciente
+             además de lo que cubre la OS. -->
 
-        <record id="tariff_avalian_aoss_01_01" model="clinic.tariff">
+        <record id="copayment_avalian_01_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_01_01"/>
-            <field name="amount_paid_by_os">18119.40</field>
+            <field name="amount">15119.00</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_01_04" model="clinic.tariff">
+        <record id="copayment_avalian_01_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_01_04"/>
-            <field name="amount_paid_by_os">24461.18</field>
+            <field name="amount">23229.22</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_02_01" model="clinic.tariff">
+        <record id="copayment_avalian_02_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_02_01"/>
-            <field name="amount_paid_by_os">36936.39</field>
+            <field name="amount">21774.23</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_02_02" model="clinic.tariff">
+        <record id="copayment_avalian_02_02" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_02_02"/>
-            <field name="amount_paid_by_os">45751.47</field>
+            <field name="amount">29879.77</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_02_03" model="clinic.tariff">
+        <record id="copayment_avalian_02_03" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_02_03"/>
-            <field name="amount_paid_by_os">54358.19</field>
+            <field name="amount">49522.59</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_02_04" model="clinic.tariff">
+        <record id="copayment_avalian_02_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_02_04"/>
-            <field name="amount_paid_by_os">52999.23</field>
+            <field name="amount">46680.06</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_02_09" model="clinic.tariff">
+        <record id="copayment_avalian_02_09" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_02_09"/>
-            <field name="amount_paid_by_os">54358.19</field>
+            <field name="amount">37243.34</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_03_01" model="clinic.tariff">
+        <record id="copayment_avalian_03_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_03_01"/>
-            <field name="amount_paid_by_os">86973.10</field>
+            <field name="amount">35827.06</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_03_02" model="clinic.tariff">
+        <record id="copayment_avalian_03_02" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_03_02"/>
-            <field name="amount_paid_by_os">134800.73</field>
+            <field name="amount">40377.50</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_03_03" model="clinic.tariff">
+        <record id="copayment_avalian_03_03" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_03_03"/>
-            <field name="amount_paid_by_os">158111.49</field>
+            <field name="amount">47356.93</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_03_04" model="clinic.tariff">
+        <record id="copayment_avalian_03_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_03_04"/>
-            <field name="amount_paid_by_os">158452.89</field>
+            <field name="amount">82484.00</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_03_05" model="clinic.tariff">
+        <record id="copayment_avalian_03_05" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_03_05"/>
-            <field name="amount_paid_by_os">65438.75</field>
+            <field name="amount">19598.70</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_03_06" model="clinic.tariff">
+        <record id="copayment_avalian_03_06" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_03_06"/>
-            <field name="amount_paid_by_os">55094.95</field>
+            <field name="amount">16643.49</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_05_01" model="clinic.tariff">
+        <record id="copayment_avalian_05_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_05_01"/>
-            <field name="amount_paid_by_os">26010.40</field>
+            <field name="amount">23271.95</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_05_02" model="clinic.tariff">
+        <record id="copayment_avalian_05_02" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_05_02"/>
-            <field name="amount_paid_by_os">17476.16</field>
+            <field name="amount">34677.00</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_05_04" model="clinic.tariff">
+        <record id="copayment_avalian_05_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_05_04"/>
-            <field name="amount_paid_by_os">26091.93</field>
+            <field name="amount">24010.65</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_05_05" model="clinic.tariff">
+        <record id="copayment_avalian_05_05" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_05_05"/>
-            <field name="amount_paid_by_os">21290.29</field>
+            <field name="amount">23303.28</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_07_01" model="clinic.tariff">
+        <record id="copayment_avalian_07_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_07_01"/>
-            <field name="amount_paid_by_os">37144.76</field>
+            <field name="amount">29795.75</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_07_04" model="clinic.tariff">
+        <record id="copayment_avalian_07_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_07_04"/>
-            <field name="amount_paid_by_os">50009.53</field>
+            <field name="amount">88024.48</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_08_01" model="clinic.tariff">
+        <record id="copayment_avalian_08_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_08_01"/>
-            <field name="amount_paid_by_os">26332.01</field>
+            <field name="amount">23064.99</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_08_02" model="clinic.tariff">
+        <record id="copayment_avalian_08_02" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_08_02"/>
-            <field name="amount_paid_by_os">54358.19</field>
+            <field name="amount">32371.55</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_08_03" model="clinic.tariff">
+        <record id="copayment_avalian_08_03" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_08_03"/>
-            <field name="amount_paid_by_os">47179.31</field>
+            <field name="amount">22162.37</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_08_04" model="clinic.tariff">
+        <record id="copayment_avalian_08_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_08_04"/>
-            <field name="amount_paid_by_os">55042.52</field>
+            <field name="amount">31851.48</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_08_12" model="clinic.tariff">
+        <record id="copayment_avalian_08_12" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_08_12"/>
-            <field name="amount_paid_by_os">31452.87</field>
+            <field name="amount">25283.24</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_08_17" model="clinic.tariff">
+        <record id="copayment_avalian_08_17" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_08_17"/>
-            <field name="amount_paid_by_os">13136.57</field>
+            <field name="amount">25077.04</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_01_01" model="clinic.tariff">
+        <record id="copayment_avalian_09_01_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_01_01"/>
-            <field name="amount_paid_by_os">9204.65</field>
+            <field name="amount">7269.47</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_01_02" model="clinic.tariff">
+        <record id="copayment_avalian_09_01_02" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_01_02"/>
-            <field name="amount_paid_by_os">9204.65</field>
+            <field name="amount">7269.47</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_01_03" model="clinic.tariff">
+        <record id="copayment_avalian_09_01_03" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_01_03"/>
-            <field name="amount_paid_by_os">9317.90</field>
+            <field name="amount">15338.71</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_01_04" model="clinic.tariff">
+        <record id="copayment_avalian_09_01_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_01_04"/>
-            <field name="amount_paid_by_os">35332.82</field>
+            <field name="amount">18709.96</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_01_05" model="clinic.tariff">
+        <record id="copayment_avalian_09_01_05" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_01_05"/>
-            <field name="amount_paid_by_os">52093.26</field>
+            <field name="amount">28566.31</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_02_01" model="clinic.tariff">
+        <record id="copayment_avalian_09_02_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_02_01"/>
-            <field name="amount_paid_by_os">22128.31</field>
+            <field name="amount">28995.15</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_02_04" model="clinic.tariff">
+        <record id="copayment_avalian_09_02_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_02_04"/>
-            <field name="amount_paid_by_os">31994.32</field>
+            <field name="amount">15184.52</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_02_05" model="clinic.tariff">
+        <record id="copayment_avalian_09_02_05" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_02_05"/>
-            <field name="amount_paid_by_os">31993.51</field>
+            <field name="amount">15185.33</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_02_07" model="clinic.tariff">
+        <record id="copayment_avalian_09_02_07" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_02_07"/>
-            <field name="amount_paid_by_os">32746.27</field>
+            <field name="amount">18916.07</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_03_01" model="clinic.tariff">
+        <record id="copayment_avalian_09_03_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_03_01"/>
-            <field name="amount_paid_by_os">54605.68</field>
+            <field name="amount">79754.92</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_03_02" model="clinic.tariff">
+        <record id="copayment_avalian_09_03_02" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_03_02"/>
-            <field name="amount_paid_by_os">32763.41</field>
+            <field name="amount">42851.29</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_03_03" model="clinic.tariff">
+        <record id="copayment_avalian_09_03_03" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_03_03"/>
-            <field name="amount_paid_by_os">32763.41</field>
+            <field name="amount">42851.29</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_09_03_04" model="clinic.tariff">
+        <record id="copayment_avalian_09_03_04" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_09_03_04"/>
-            <field name="amount_paid_by_os">43684.42</field>
+            <field name="amount">58861.27</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_10_01" model="clinic.tariff">
+        <record id="copayment_avalian_10_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_10_01"/>
-            <field name="amount_paid_by_os">42127.60</field>
+            <field name="amount">22190.15</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_10_06" model="clinic.tariff">
+        <record id="copayment_avalian_10_06" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_10_06"/>
-            <field name="amount_paid_by_os">44392.52</field>
+            <field name="amount">38166.60</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_10_09" model="clinic.tariff">
+        <record id="copayment_avalian_10_09" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_10_09"/>
-            <field name="amount_paid_by_os">126835.76</field>
+            <field name="amount">66742.58</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_10_09_01" model="clinic.tariff">
+        <record id="copayment_avalian_10_09_01" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_10_09_01"/>
-            <field name="amount_paid_by_os">51980.01</field>
+            <field name="amount">30605.56</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_10_12" model="clinic.tariff">
+        <record id="copayment_avalian_10_12" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_10_12"/>
-            <field name="amount_paid_by_os">65931.94</field>
+            <field name="amount">54095.52</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
-        <record id="tariff_avalian_aoss_10_18" model="clinic.tariff">
+        <record id="copayment_avalian_10_18" model="clinic.copayment">
             <field name="health_insurance_id" ref="health_insurance_avalian"/>
-            <field name="billing_route_id" ref="billing_route_aoss"/>
             <field name="practice_id" ref="practice_10_18"/>
-            <field name="amount_paid_by_os">55898.34</field>
+            <field name="amount">41302.61</field>
             <field name="valid_from">2025-11-01</field>
         </record>
 
