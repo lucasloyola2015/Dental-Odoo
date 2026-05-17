@@ -1,20 +1,26 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { OdontogramPopover } from "./odontogram_popover";
 
 /**
- * OdontogramField — SVG odontogram with click-to-edit.
+ * OdontogramField — SVG odontogram with click-to-edit + table-edit sync.
  *
- * Owns its own copy of the state list (`useState`) which it loads via
- * searchRead on init and re-loads after every popover save/delete.
- * This guarantees the SVG re-renders even when changes are made
- * outside the parent record's O2m. The parent record is also reloaded
- * so the tabular list below stays in sync.
+ * Renders the 52 FDI teeth in 4-quadrant layout. Each tooth has 5 surfaces
+ * filled by (state, phase). Click a surface to open OdontogramPopover.
+ *
+ * Sync strategy:
+ *   - localState.rows is the single source of truth for rendering.
+ *   - useEffect watches a shallow hash of the parent record's O2m records and
+ *     mirrors them into localState.rows. This catches BOTH user edits in the
+ *     editable list below the SVG AND any record.load() triggered by the
+ *     popover after a direct ORM write.
+ *   - fdiByToothId map fills in tooth_fdi_code locally if the O2m record
+ *     doesn't carry the related field (it isn't requested by the view).
  */
 export class OdontogramField extends Component {
     static template = "clinic_dental.OdontogramField";
@@ -52,6 +58,7 @@ export class OdontogramField extends Component {
         this.orm = useService("orm");
         this.popover = usePopover(OdontogramPopover);
         this.fdiToToothId = {};
+        this.fdiByToothId = {};
         this.localState = useState({ rows: [] });
 
         onWillStart(async () => {
@@ -60,22 +67,44 @@ export class OdontogramField extends Component {
             );
             for (const t of teeth) {
                 this.fdiToToothId[t.fdi_code] = t.id;
+                this.fdiByToothId[t.id] = t.fdi_code;
             }
-            await this.refreshLocalStates();
         });
+
+        // Mirror the parent O2m into localState whenever it changes.
+        useEffect(
+            () => { this._syncFromO2m(); },
+            () => [this._o2mFingerprint()]
+        );
     }
 
-    async refreshLocalStates() {
-        const patientId = this.props.record.resId;
-        if (!patientId) {
-            this.localState.rows = [];
-            return;
-        }
-        this.localState.rows = await this.orm.searchRead(
-            "clinic.dental.tooth.state",
-            [["patient_id", "=", patientId]],
-            ["id", "tooth_fdi_code", "surface", "phase", "state", "notes"]
-        );
+    /** Build a fingerprint string of the current O2m records so useEffect can detect changes. */
+    _o2mFingerprint() {
+        const list = this.props.record.data[this.props.name];
+        const records = (list && list.records) ? list.records : [];
+        return records.map(r => {
+            const tid = r.data.tooth_id ? r.data.tooth_id[0] : null;
+            return `${r.resId || "new"}|${tid}|${r.data.surface}|${r.data.phase}|${r.data.state}|${r.data.notes || ""}`;
+        }).join("§");
+    }
+
+    _syncFromO2m() {
+        const list = this.props.record.data[this.props.name];
+        const records = (list && list.records) ? list.records : [];
+        this.localState.rows = records.map(r => {
+            let fdi = r.data.tooth_fdi_code;
+            if (!fdi && r.data.tooth_id) {
+                fdi = this.fdiByToothId[r.data.tooth_id[0]] || "";
+            }
+            return {
+                id: r.resId || null,
+                tooth_fdi_code: fdi,
+                surface: r.data.surface,
+                phase: r.data.phase,
+                state: r.data.state,
+                notes: r.data.notes || "",
+            };
+        });
     }
 
     get topPath()    { return "M0,0 L36,0 L24,12 L12,12 Z"; }
@@ -83,16 +112,16 @@ export class OdontogramField extends Component {
     get bottomPath() { return "M36,36 L0,36 L12,24 L24,24 Z"; }
     get leftPath()   { return "M0,36 L0,0 L12,12 L12,24 Z"; }
 
-    /** Build the lookup { fdi: { surface: [{id, state, phase, notes}, ...] } } from local state. */
     get statesByTooth() {
         const map = {};
         for (const r of this.localState.rows) {
             const fdi = r.tooth_fdi_code;
             if (!fdi) continue;
             const surf = r.surface;
+            if (!surf) continue;
             map[fdi] = map[fdi] || {};
             map[fdi][surf] = map[fdi][surf] || [];
-            map[fdi][surf].push({ id: r.id, state: r.state, phase: r.phase, notes: r.notes || "" });
+            map[fdi][surf].push({ id: r.id, state: r.state, phase: r.phase, notes: r.notes });
         }
         return map;
     }
@@ -171,8 +200,7 @@ export class OdontogramField extends Component {
             toothId,
             existing,
             onChange: async () => {
-                // Local refresh -> SVG re-renders. Parent reload -> bottom table syncs.
-                await this.refreshLocalStates();
+                // Reload parent record -> useEffect picks up the new O2m records.
                 await this.props.record.load();
             },
         });
