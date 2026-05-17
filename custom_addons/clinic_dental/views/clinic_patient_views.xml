@@ -45,5 +45,45 @@
             </field>
         </record>
 
+        <!-- Dedicated form view: opens with only the odontogram + detail table.
+             Used by the smart button on the regular patient form (action_view_dental_chart). -->
+        <record id="view_clinic_patient_dental_chart_form" model="ir.ui.view">
+            <field name="name">clinic.patient.dental.chart.form</field>
+            <field name="model">clinic.patient</field>
+            <field name="priority">99</field>
+            <field name="arch" type="xml">
+                <form string="Odontograma" create="false" delete="false">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                            <div class="text-muted">
+                                Click en cualquier superficie para registrar.
+                                <span class="badge bg-danger ms-2">Rojo</span> previsto ·
+                                <span class="badge bg-primary">Azul</span> realizado.
+                            </div>
+                        </div>
+                        <field name="dental_tooth_state_ids" widget="odontogram"
+                               context="{'default_patient_id': id}"/>
+                        <separator string="Detalle (lista)"/>
+                        <field name="dental_tooth_state_ids" nolabel="1" context="{'default_patient_id': id}">
+                            <list editable="bottom"
+                                  decoration-danger="phase=='planned'"
+                                  decoration-info="phase=='realized'">
+                                <field name="tooth_id" options="{'no_create': True}"/>
+                                <field name="tooth_fdi_code" column_invisible="True"/>
+                                <field name="surface"/>
+                                <field name="state"/>
+                                <field name="phase"/>
+                                <field name="notes" optional="show"/>
+                                <field name="last_updated" optional="hide" readonly="1"/>
+                            </list>
+                        </field>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
     </data>
 </odoo>

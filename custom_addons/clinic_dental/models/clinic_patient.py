@@ -23,13 +23,20 @@ class ClinicPatient(models.Model):
             )
 
     def action_view_dental_chart(self):
-        """Open the patient's tooth-state list, filtered to this patient."""
+        """Open the patient on a dedicated form that only shows the odontogram widget
+        and its detail list. Reuses the patient record (not a transient) so writes
+        persist directly."""
         self.ensure_one()
+        view = self.env.ref(
+            "clinic_dental.view_clinic_patient_dental_chart_form",
+            raise_if_not_found=False,
+        )
         return {
             "type": "ir.actions.act_window",
             "name": _("Odontograma — %s") % self.name,
-            "res_model": "clinic.dental.tooth.state",
-            "view_mode": "list,form",
-            "domain": [("patient_id", "=", self.id)],
-            "context": {"default_patient_id": self.id},
+            "res_model": "clinic.patient",
+            "res_id": self.id,
+            "view_mode": "form",
+            "views": [(view.id if view else False, "form")],
+            "target": "current",
         }
