@@ -13,6 +13,8 @@
                             <text t-att-x="18" t-att-y="t.labelY" text-anchor="middle" font-size="10" fill="#333">
                                 <t t-esc="t.fdi"/>
                             </text>
+
+                            <!-- 5 surface zones -->
                             <path t-att-d="topPath" t-att-fill="t.fillTop" stroke="#333" stroke-width="0.8"
                                   style="cursor: pointer;"
                                   t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, t.surfaceTop)">
@@ -38,6 +40,33 @@
                                   t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, 'occlusal')">
                                 <title><t t-esc="t.tooltipCenter"/></title>
                             </rect>
+
+                            <!-- Overlay symbols for tooth-wide states. Drawn on top so they
+                                 sit over the surface fills. Pointer-events: none so clicks
+                                 still reach the underlying surfaces. -->
+                            <g style="pointer-events: none;">
+                                <!-- Crown: outline circle around the tooth -->
+                                <circle t-if="t.overlayCrown" cx="18" cy="18" r="20"
+                                        fill="none" t-att-stroke="t.overlayCrown.color" stroke-width="2"/>
+                                <!-- Endodontic: vertical line through the tooth -->
+                                <line t-if="t.overlayEndodontic" x1="18" y1="2" x2="18" y2="34"
+                                      t-att-stroke="t.overlayEndodontic.color" stroke-width="2.5"/>
+                                <!-- Implant: 3 short horizontal bars at the apex (top for upper, bottom for lower) -->
+                                <g t-if="t.overlayImplant" t-att-stroke="t.overlayImplant.color" stroke-width="1.5">
+                                    <line x1="10" y1="34" x2="26" y2="34"/>
+                                    <line x1="12" y1="37" x2="24" y2="37"/>
+                                    <line x1="14" y1="40" x2="22" y2="40"/>
+                                </g>
+                                <!-- Prosthesis (Π): bracket framing the tooth top -->
+                                <path t-if="t.overlayProsthesis"
+                                      d="M-2,-4 L-2,18 M38,-4 L38,18 M-2,-4 L38,-4"
+                                      fill="none" t-att-stroke="t.overlayProsthesis.color" stroke-width="2.5"/>
+                                <!-- X (extraction / missing): two diagonals -->
+                                <g t-if="t.overlayX" t-att-stroke="t.overlayX.color" stroke-width="2.5" stroke-linecap="round">
+                                    <line x1="2" y1="2" x2="34" y2="34"/>
+                                    <line x1="34" y1="2" x2="2" y2="34"/>
+                                </g>
+                            </g>
                         </g>
                     </t>
                 </svg>
@@ -47,7 +76,10 @@
                 <strong>Leyenda:</strong>
                 <span class="badge bg-danger me-1">Rojo</span> Previsto / observado.
                 <span class="badge bg-primary me-1 ms-2">Azul</span> Realizado / existente.
-                <span class="text-muted ms-3">Blanco = sin registro. Click en cualquier superficie para editar.</span>
+                <span class="text-muted ms-3">
+                    Colores en superficies = caries / obturación / resto radicular.
+                    Símbolos sobre el diente: ✕ extracción/ausente · ⌐⌐ prótesis · ○ corona · ∣ endodoncia · ─ implante.
+                </span>
             </div>
         </div>
     </t>

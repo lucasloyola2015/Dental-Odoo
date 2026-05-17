@@ -8,19 +8,18 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { OdontogramPopover } from "./odontogram_popover";
 
 /**
- * OdontogramField — SVG odontogram with click-to-edit + table-edit sync.
+ * OdontogramField — SVG odontogram with click-to-edit and standard symbols.
  *
- * Renders the 52 FDI teeth in 4-quadrant layout. Each tooth has 5 surfaces
- * filled by (state, phase). Click a surface to open OdontogramPopover.
+ * Per-surface fills for caries/restoration/root_fragment (5 zones per tooth).
+ * Tooth-wide symbols overlaid on top for states that affect the whole tooth:
+ *   - X (extraction / missing): two diagonals across the tooth.
+ *   - Π (prosthesis): bracket shape framing the tooth.
+ *   - Circle outline (crown): around the tooth box.
+ *   - Diagonal line (endodontic): from root to crown.
+ *   - Pin (implant): horizontal bars at the root.
  *
- * Sync strategy:
- *   - localState.rows is the single source of truth for rendering.
- *   - useEffect watches a shallow hash of the parent record's O2m records and
- *     mirrors them into localState.rows. This catches BOTH user edits in the
- *     editable list below the SVG AND any record.load() triggered by the
- *     popover after a direct ORM write.
- *   - fdiByToothId map fills in tooth_fdi_code locally if the O2m record
- *     doesn't carry the related field (it isn't requested by the view).
+ * Red palette = phase 'planned' (observed / planned).
+ * Blue palette = phase 'realized' (realized / existing).
  */
 export class OdontogramField extends Component {
     static template = "clinic_dental.OdontogramField";
@@ -43,16 +42,20 @@ export class OdontogramField extends Component {
 
     static COLOR = {
         planned: {
-            caries: "#dc3545", restoration: "#dc3545", endodontic: "#dc3545",
-            crown: "#dc3545", prosthesis: "#dc3545", implant: "#dc3545",
-            extraction: "#dc3545", root_fragment: "#dc3545", missing: "#dc3545",
+            caries: "#dc3545", restoration: "#dc3545", root_fragment: "#dc3545",
         },
         realized: {
-            caries: "#6c757d", restoration: "#0d6efd", endodontic: "#0d6efd",
-            crown: "#0d6efd", prosthesis: "#0d6efd", implant: "#0d6efd",
-            extraction: "#0d6efd", root_fragment: "#6c757d", missing: "#0d6efd",
+            caries: "#6c757d", restoration: "#0d6efd", root_fragment: "#6c757d",
         },
     };
+
+    // States that affect the WHOLE tooth and are rendered as overlay symbols
+    // instead of (or on top of) surface fills.
+    static GLOBAL_STATES = new Set([
+        "extraction", "missing", "prosthesis", "crown", "endodontic", "implant",
+    ]);
+    // States that fill a specific surface with a color.
+    static SURFACE_STATES = new Set(["caries", "restoration", "root_fragment"]);
 
     setup() {
         this.orm = useService("orm");
@@ -71,14 +74,12 @@ export class OdontogramField extends Component {
             }
         });
 
-        // Mirror the parent O2m into localState whenever it changes.
         useEffect(
             () => { this._syncFromO2m(); },
             () => [this._o2mFingerprint()]
         );
     }
 
-    /** Robustly extract a numeric id from a Many2one value (Odoo 19 may give array or object). */
     _extractToothId(toothIdValue) {
         if (toothIdValue == null) return null;
         if (Array.isArray(toothIdValue)) return toothIdValue[0] || null;
@@ -89,7 +90,6 @@ export class OdontogramField extends Component {
         return null;
     }
 
-    /** Build a fingerprint string of the current O2m records so useEffect can detect changes. */
     _o2mFingerprint() {
         const list = this.props.record.data[this.props.name];
         const records = (list && list.records) ? list.records : [];
@@ -140,10 +140,12 @@ export class OdontogramField extends Component {
         return map;
     }
 
+    /** Surface fill: only for surface-level states. Global states leave white here
+     *  (they're drawn as overlay symbols by _toothOverlays). */
     fill(fdi, surface) {
         const states = (this.statesByTooth[fdi] || {})[surface] || [];
-        const realized = states.find(s => s.phase === "realized");
-        const planned  = states.find(s => s.phase === "planned");
+        const realized = states.find(s => s.phase === "realized" && OdontogramField.SURFACE_STATES.has(s.state));
+        const planned  = states.find(s => s.phase === "planned"  && OdontogramField.SURFACE_STATES.has(s.state));
         if (realized) return OdontogramField.COLOR.realized[realized.state] || "#999";
         if (planned)  return OdontogramField.COLOR.planned[planned.state]   || "#dc3545";
         return "#ffffff";
@@ -154,6 +156,29 @@ export class OdontogramField extends Component {
         if (!states.length) return `${fdi} · ${surface} (click para registrar)`;
         const parts = states.map(s => `${s.state} (${s.phase === "planned" ? "previsto" : "realizado"})`);
         return `${fdi} · ${surface}: ${parts.join(" + ")}`;
+    }
+
+    /** Detect tooth-wide ("global") states by collapsing all surfaces.
+     *  Returns objects describing each symbol that should be drawn on the tooth. */
+    _toothOverlays(fdi) {
+        const surfaces = this.statesByTooth[fdi] || {};
+        // Collect global states found across any surface, keeping (state, phase).
+        const globals = [];
+        for (const surf of Object.keys(surfaces)) {
+            for (const s of surfaces[surf]) {
+                if (OdontogramField.GLOBAL_STATES.has(s.state)) {
+                    // Dedup by (state, phase) since the same global state on multiple
+                    // surfaces is semantically the same situation.
+                    if (!globals.some(g => g.state === s.state && g.phase === s.phase)) {
+                        globals.push({ state: s.state, phase: s.phase });
+                    }
+                }
+            }
+        }
+        return globals.map(g => {
+            const color = g.phase === "planned" ? "#dc3545" : "#0d6efd";
+            return { ...g, color };
+        });
     }
 
     get positionedTeeth() {
@@ -181,6 +206,7 @@ export class OdontogramField extends Component {
         const leftSurface  = inLeftHalf ? "distal" : "mesial";
         const rightSurface = inLeftHalf ? "mesial" : "distal";
         const labelY = row.isUpper ? -4 : 50;
+        const overlays = this._toothOverlays(fdi);
         return {
             fdi: String(fdi),
             transform: `translate(${x}, ${row.y})`,
@@ -197,6 +223,12 @@ export class OdontogramField extends Component {
             tooltipBottom: this.tooltip(fdi, bottomSurface),
             tooltipLeft:   this.tooltip(fdi, leftSurface),
             tooltipCenter: this.tooltip(fdi, "occlusal"),
+            // Overlay symbols: one per (state, phase) tuple of tooth-wide states.
+            overlayX:           overlays.find(o => o.state === "extraction" || o.state === "missing"),
+            overlayProsthesis:  overlays.find(o => o.state === "prosthesis"),
+            overlayCrown:       overlays.find(o => o.state === "crown"),
+            overlayEndodontic:  overlays.find(o => o.state === "endodontic"),
+            overlayImplant:     overlays.find(o => o.state === "implant"),
         };
     }
 
@@ -213,10 +245,7 @@ export class OdontogramField extends Component {
             patientId,
             toothId,
             existing,
-            onChange: async () => {
-                // Reload parent record -> useEffect picks up the new O2m records.
-                await this.props.record.load();
-            },
+            onChange: async () => { await this.props.record.load(); },
         });
     }
 }
