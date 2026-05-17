@@ -1,0 +1,37 @@
+.o_odontogram_widget {
+    width: 100%;
+    padding: 8px 4px;
+
+    .o_odontogram_chart {
+        background: #fafafa;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 24px 12px 8px 12px;
+        overflow-x: auto;
+    }
+
+    .o_odontogram_svg {
+        display: block;
+        margin: 0 auto;
+        max-width: 720px;
+        width: 100%;
+        height: auto;
+    }
+
+    .o_odontogram_svg path,
+    .o_odontogram_svg rect {
+        cursor: default;
+        transition: opacity 0.1s ease-in-out;
+    }
+
+    .o_odontogram_svg path:hover,
+    .o_odontogram_svg rect:hover {
+        opacity: 0.7;
+    }
+
+    .o_odontogram_legend {
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #555;
+    }
+}

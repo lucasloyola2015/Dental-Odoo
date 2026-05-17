@@ -26,6 +26,13 @@ Incluye:
         'views/clinic_appointment_views.xml',
         'data/clinic_dental_tooth_data.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'clinic_dental/static/src/components/odontogram/odontogram.js',
+            'clinic_dental/static/src/components/odontogram/odontogram.xml',
+            'clinic_dental/static/src/components/odontogram/odontogram.scss',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False,

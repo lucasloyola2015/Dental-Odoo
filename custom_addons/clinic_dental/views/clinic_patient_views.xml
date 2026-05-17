@@ -10,16 +10,17 @@
             <field name="arch" type="xml">
                 <xpath expr="//notebook/page[@name='notes']" position="before">
                     <page string="Odontograma" name="dental_chart">
+                        <field name="dental_tooth_state_ids" widget="odontogram"
+                               context="{'default_patient_id': id}"/>
+                        <separator string="Detalle (lista)"/>
                         <div class="text-muted mb-2">
-                            Estado por superficie de cada pieza dentaria. Cada fila es una
-                            superficie en una fase (previsto/realizado). Una misma superficie
-                            puede tener ambas fases en simultáneo (ej: caries observada +
-                            obturación prevista).
+                            Vista tabular del mismo dato. Edición rápida desde acá hasta que
+                            la edición desde el odontograma esté disponible (iteración C).
                             <br/>
                             <span class="text-danger">Filas rojas</span> = previsto / observado.
                             <span class="text-info">Filas celestes</span> = realizado / existente.
                         </div>
-                        <field name="dental_tooth_state_ids" context="{'default_patient_id': id}">
+                        <field name="dental_tooth_state_ids" context="{'default_patient_id': id}" nolabel="1">
                             <list editable="bottom"
                                   decoration-danger="phase=='planned'"
                                   decoration-info="phase=='realized'">

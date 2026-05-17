@@ -31,6 +31,12 @@ class ClinicDentalToothState(models.Model):
         ondelete="restrict",
         index=True,
     )
+    tooth_fdi_code = fields.Char(
+        related="tooth_id.fdi_code",
+        store=False,
+        readonly=True,
+        help="Atajo para acceso por código FDI desde JS/QWeb.",
+    )
     surface = fields.Selection(
         selection=[
             ("occlusal", "Oclusal / Incisal"),
