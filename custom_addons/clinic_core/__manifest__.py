@@ -62,7 +62,7 @@ en este módulo.
         "data/clinic_cron_data.xml",
     ],
     "external_dependencies": {
-        "python": ["reportlab", "pypdf"],
+        "python": ["reportlab", "PyPDF2"],
     },
     "installable": True,
     "application": True,

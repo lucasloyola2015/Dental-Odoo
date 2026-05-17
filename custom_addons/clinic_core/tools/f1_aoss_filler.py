@@ -90,7 +90,9 @@ def render_f1_aoss(data):
     :return bytes: the merged PDF.
     """
     from reportlab.pdfgen import canvas
-    from pypdf import PdfReader, PdfWriter
+    # PyPDF2 ships with Odoo 19 globally; pypdf is the newer fork but isn't
+    # installed in the service's site-packages by default.
+    from PyPDF2 import PdfReader, PdfWriter
 
     overlay_buf = BytesIO()
     c = canvas.Canvas(overlay_buf, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
