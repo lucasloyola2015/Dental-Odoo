@@ -2,12 +2,19 @@
 <odoo>
     <data>
 
-        <!-- Inherit the patient form and add an "Odontograma" tab -->
+        <!-- Inherit the patient form and add an "Odontograma" tab + smart button -->
         <record id="view_clinic_patient_form_dental" model="ir.ui.view">
             <field name="name">clinic.patient.form.dental</field>
             <field name="model">clinic.patient</field>
             <field name="inherit_id" ref="clinic_core.view_clinic_patient_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="action_view_dental_chart" type="object"
+                            class="oe_stat_button" icon="fa-medkit"
+                            invisible="not dental_affected_teeth_count">
+                        <field name="dental_affected_teeth_count" widget="statinfo" string="Odontograma"/>
+                    </button>
+                </xpath>
                 <xpath expr="//notebook/page[@name='notes']" position="before">
                     <page string="Odontograma" name="dental_chart">
                         <field name="dental_tooth_state_ids" widget="odontogram"
