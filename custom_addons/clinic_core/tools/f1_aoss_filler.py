@@ -84,26 +84,85 @@ def _draw(canvas_obj, field, value):
 
 
 def render_f1_aoss(data):
-    """Generate the filled F1 AOSS PDF bytes.
+    """Legacy entry point: render the F1 AOSS form using the hard-coded
+    FIELD_POSITIONS dict and the file-system template. Kept for compatibility;
+    prefer render_billing_form(route, data)."""
+    return _render_pdf(
+        data,
+        positions=FIELD_POSITIONS,
+        template_bytes=None,
+        page_size=(PAGE_WIDTH, PAGE_HEIGHT),
+        font_size=DEFAULT_SIZE,
+    )
 
-    :param dict data: keys per FIELD_POSITIONS keys (str values).
+
+def render_billing_form(billing_route, data):
+    """Render the billing form for a clinic.billing.route. Reads template +
+    coords from the DB (route.pdf_template / route.pdf_field_ids). Falls back
+    to the static F1_AOSS.pdf + FIELD_POSITIONS if the DB has neither.
+
+    :param recordset billing_route: single clinic.billing.route record.
+    :param dict data: keys matching field_key values (strings).
     :return bytes: the merged PDF.
     """
+    import base64
+
+    billing_route.ensure_one()
+
+    template_bytes = None
+    if billing_route.pdf_template:
+        template_bytes = base64.b64decode(billing_route.pdf_template)
+
+    positions = {}
+    font_sizes = {}
+    for fld in billing_route.pdf_field_ids:
+        positions[fld.field_key] = (fld.x, fld.y)
+        font_sizes[fld.field_key] = fld.font_size or DEFAULT_SIZE
+
+    if not positions:
+        positions = FIELD_POSITIONS
+
+    return _render_pdf(
+        data,
+        positions=positions,
+        template_bytes=template_bytes,
+        page_size=(PAGE_WIDTH, PAGE_HEIGHT),
+        font_size=DEFAULT_SIZE,
+        per_field_font_size=font_sizes,
+    )
+
+
+def _render_pdf(data, positions, template_bytes, page_size, font_size, per_field_font_size=None):
+    """Internal: generate the overlay with reportlab and merge with PyPDF2."""
     from reportlab.pdfgen import canvas
-    # PyPDF2 ships with Odoo 19 globally; pypdf is the newer fork but isn't
-    # installed in the service's site-packages by default.
     from PyPDF2 import PdfReader, PdfWriter
 
+    page_width, page_height = page_size
     overlay_buf = BytesIO()
-    c = canvas.Canvas(overlay_buf, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
-    c.setFont(DEFAULT_FONT, DEFAULT_SIZE)
+    c = canvas.Canvas(overlay_buf, pagesize=page_size)
+    c.setFont(DEFAULT_FONT, font_size)
     for field, value in data.items():
-        _draw(c, field, value)
+        if value is None or value == "":
+            continue
+        if field not in positions:
+            continue
+        x, y_top = positions[field]
+        y_bl = page_height - y_top
+        size = (per_field_font_size or {}).get(field, font_size)
+        if size != font_size:
+            c.setFont(DEFAULT_FONT, size)
+        c.drawString(x, y_bl, str(value))
+        if size != font_size:
+            c.setFont(DEFAULT_FONT, font_size)
     c.save()
     overlay_buf.seek(0)
 
-    template_path = file_path("clinic_core/data/pdf_templates/F1_AOSS.pdf")
-    template = PdfReader(template_path)
+    if template_bytes:
+        template = PdfReader(BytesIO(template_bytes))
+    else:
+        template_path = file_path("clinic_core/data/pdf_templates/F1_AOSS.pdf")
+        template = PdfReader(template_path)
+
     overlay = PdfReader(overlay_buf)
     writer = PdfWriter()
     page = template.pages[0]

@@ -4,7 +4,7 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
-from odoo.addons.clinic_core.tools.f1_aoss_filler import render_f1_aoss
+from odoo.addons.clinic_core.tools.f1_aoss_filler import render_billing_form
 
 
 class ClinicAppointment(models.Model):
@@ -778,7 +778,7 @@ class ClinicAppointment(models.Model):
             ))
 
         data = self._f1_aoss_field_data()
-        pdf_bytes = render_f1_aoss(data)
+        pdf_bytes = render_billing_form(self.location_id.billing_route_id, data)
 
         safe_name = (self.display_name or ("turno-%d" % self.id)).replace("/", "-").replace(" ", "_")
         filename = "F1_AOSS_%s.pdf" % safe_name[:80]

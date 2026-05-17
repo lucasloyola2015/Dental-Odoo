@@ -32,6 +32,27 @@ class ClinicBillingRoute(models.Model):
         help="Vacío = vía compartida entre todas las compañías.",
     )
 
+    # ---- PDF template (overlay billing form) ----
+    pdf_template = fields.Binary(
+        string="Plantilla PDF",
+        help="PDF original del formulario (ej. F1 AOSS). Se sobreimprime con los datos del turno al facturar.",
+    )
+    pdf_template_filename = fields.Char(string="Nombre archivo")
+    pdf_field_ids = fields.One2many(
+        comodel_name="clinic.billing.route.pdf.field",
+        inverse_name="billing_route_id",
+        string="Campos a sobreimprimir",
+    )
+    pdf_field_count = fields.Integer(
+        string="Cantidad de campos",
+        compute="_compute_pdf_field_count",
+    )
+
+    @api.depends("pdf_field_ids")
+    def _compute_pdf_field_count(self):
+        for rec in self:
+            rec.pdf_field_count = len(rec.pdf_field_ids)
+
     @api.constrains("code", "company_id")
     def _check_code_unique(self):
         for rec in self:
