@@ -61,6 +61,9 @@ en este módulo.
         "data/clinic_mail_templates.xml",
         "data/clinic_cron_data.xml",
     ],
+    "external_dependencies": {
+        "python": ["reportlab", "pypdf"],
+    },
     "installable": True,
     "application": True,
     "auto_install": False,

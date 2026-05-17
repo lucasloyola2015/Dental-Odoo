@@ -1,7 +1,10 @@
+import base64
 from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+
+from odoo.addons.clinic_core.tools.f1_aoss_filler import render_f1_aoss
 
 
 class ClinicAppointment(models.Model):
@@ -738,6 +741,143 @@ class ClinicAppointment(models.Model):
             if rec.state in ("fulfilled", "cancelled", "noshow"):
                 raise UserError(_("No se puede revertir un turno %s a Pendiente.") % rec.state)
         self.write({"state": "pending"})
+
+    # -------------------------------------------------------------------------
+    # F1 AOSS — print billing form for this appointment
+    # -------------------------------------------------------------------------
+
+    f1_aoss_eligible = fields.Boolean(
+        compute="_compute_f1_aoss_eligible",
+        help=(
+            "True cuando este turno se puede facturar a AOSS: la sede usa "
+            "billing_route=AOSS, hay coverage cargada y el turno no está cancelado/noshow."
+        ),
+    )
+
+    @api.depends("location_id.billing_route_id", "coverage_id", "state")
+    def _compute_f1_aoss_eligible(self):
+        aoss = self.env.ref("clinic_core.billing_route_aoss", raise_if_not_found=False)
+        aoss_id = aoss.id if aoss else False
+        for rec in self:
+            rec.f1_aoss_eligible = bool(
+                aoss_id
+                and rec.location_id
+                and rec.location_id.billing_route_id.id == aoss_id
+                and rec.coverage_id
+                and rec.state not in ("cancelled", "noshow", "entered-in-error")
+            )
+
+    def action_print_f1_aoss(self):
+        """Generate the AOSS F1 PDF for this appointment by overlaying text
+        onto the official template; return as a downloadable attachment."""
+        self.ensure_one()
+        if not self.f1_aoss_eligible:
+            raise UserError(_(
+                "Este turno no es elegible para F1 AOSS. Verificá que la sede use "
+                "billing_route=AOSS y que el turno tenga cobertura cargada."
+            ))
+
+        data = self._f1_aoss_field_data()
+        pdf_bytes = render_f1_aoss(data)
+
+        filename = "F1_AOSS_%s.pdf" % (self.name or "turno").replace("/", "-")
+        attachment = self.env["ir.attachment"].create({
+            "name": filename,
+            "type": "binary",
+            "datas": base64.b64encode(pdf_bytes),
+            "mimetype": "application/pdf",
+            "res_model": "clinic.appointment",
+            "res_id": self.id,
+        })
+        return {
+            "type": "ir.actions.act_url",
+            "url": "/web/content/%s?download=true" % attachment.id,
+            "target": "self",
+        }
+
+    def _f1_aoss_field_data(self):
+        """Build the dict of values to draw on top of the F1 template.
+        Returns keys matching FIELD_POSITIONS in tools/f1_aoss_filler.py."""
+        self.ensure_one()
+        cov = self.coverage_id
+        patient = self.patient_id
+        partner = patient.partner_id
+        practitioner = self.practitioner_id
+
+        start = self.start_datetime
+        mes_str = ("%02d" % start.month) if start else ""
+        anio_str = str(start.year) if start else ""
+
+        birthdate = patient.birthdate
+        if birthdate:
+            d_str = "%02d" % birthdate.day
+            m_str = "%02d" % birthdate.month
+            y_str = str(birthdate.year)
+        else:
+            d_str = m_str = y_str = ""
+
+        # Headers: OS name (cabecera) + plan + afiliado
+        os_name = cov.health_insurance_id.name if cov and cov.health_insurance_id else ""
+        plan = cov.plan or "" if cov else ""
+        afiliado = cov.member_number or "" if cov else ""
+
+        # Patient details from partner
+        full_name = partner.name or ""
+        domicilio = partner.street or ""
+        localidad = partner.city or ""
+        documento = partner.vat or ""
+        telefono = partner.mobile or partner.phone or ""
+
+        # Practitioner
+        prac_name = practitioner.name or ""
+        matricula = practitioner.medical_license or ""
+
+        # Totals (computed by the appointment's valuation)
+        amount_os = self.amount_paid_by_os or 0.0
+        amount_afil = (self.copayment_amount or 0.0) + (self.professional_extra_final or 0.0) + (self.clinic_extra or 0.0)
+        total = amount_os + amount_afil
+
+        def _money(x):
+            return ("%.2f" % x) if x else ""
+
+        return {
+            # Main header
+            "os_code":         os_name,
+            "plan":            plan,
+            "mes":             mes_str,
+            "anio":            anio_str,
+            "afiliado":        afiliado,
+            "apellido_nombre": full_name,
+            "fecha_nac_dia":   d_str,
+            "fecha_nac_mes":   m_str,
+            "fecha_nac_anio":  y_str,
+            "domicilio":       domicilio,
+            "localidad":       localidad,
+            "documento":       documento,
+            "telefono":        telefono,
+            "odontologo":      prac_name,
+            "matricula":       matricula,
+            # Totals
+            "a_cargo_os":      _money(amount_os),
+            "a_cargo_afil":    _money(amount_afil),
+            "total":           _money(total),
+            # Talón Asociación
+            "asoc_os":         os_name,
+            "asoc_afiliado":   afiliado,
+            "asoc_mes":        mes_str,
+            "asoc_anio":       anio_str,
+            "asoc_apellido":   full_name,
+            "asoc_domicilio":  domicilio,
+            "asoc_doc":        documento,
+            # Talón Odontólogo
+            "odon_os":         os_name,
+            "odon_afiliado":   afiliado,
+            "odon_mes":        mes_str,
+            "odon_anio":       anio_str,
+            "odon_apellido":   full_name,
+            "odon_domicilio":  domicilio,
+            "odon_doc":        documento,
+        }
 
     def _set_state(self, target, from_states):
         for rec in self:

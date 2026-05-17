@@ -58,6 +58,11 @@
                         <button name="action_send_reminder_email" type="object"
                                 string="📧 Enviar recordatorio"
                                 invisible="state in ('cancelled', 'noshow', 'fulfilled', 'entered-in-error')"/>
+                        <button name="action_print_f1_aoss" type="object"
+                                string="🖨️ F1 AOSS"
+                                invisible="not f1_aoss_eligible"
+                                help="Imprime el F1 AOSS prellenado para facturar este turno a la asociación."/>
+                        <field name="f1_aoss_eligible" invisible="1"/>
                         <button name="action_reset_to_pending" type="object" string="Volver a Pendiente"
                                 invisible="state in ('pending', 'proposed', 'fulfilled', 'cancelled', 'noshow', 'entered-in-error')"/>
                         <field name="state" widget="statusbar"
