@@ -10,7 +10,7 @@
                     <field name="tooth_id" options="{'no_create': True}"/>
                     <field name="surface"/>
                     <field name="state"/>
-                    <field name="phase" widget="badge"/>
+                    <field name="phase"/>
                     <field name="notes" optional="show"/>
                     <field name="last_updated" optional="hide" readonly="1"/>
                 </list>
