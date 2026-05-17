@@ -25,6 +25,7 @@
                                   decoration-danger="phase=='planned'"
                                   decoration-info="phase=='realized'">
                                 <field name="tooth_id" options="{'no_create': True}"/>
+                                <field name="tooth_fdi_code" column_invisible="True"/>
                                 <field name="surface"/>
                                 <field name="state"/>
                                 <field name="phase"/>

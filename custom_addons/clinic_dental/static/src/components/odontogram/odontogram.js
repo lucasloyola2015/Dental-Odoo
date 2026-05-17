@@ -78,12 +78,23 @@ export class OdontogramField extends Component {
         );
     }
 
+    /** Robustly extract a numeric id from a Many2one value (Odoo 19 may give array or object). */
+    _extractToothId(toothIdValue) {
+        if (toothIdValue == null) return null;
+        if (Array.isArray(toothIdValue)) return toothIdValue[0] || null;
+        if (typeof toothIdValue === "number") return toothIdValue;
+        if (typeof toothIdValue === "object") {
+            return toothIdValue.resId ?? toothIdValue.id ?? null;
+        }
+        return null;
+    }
+
     /** Build a fingerprint string of the current O2m records so useEffect can detect changes. */
     _o2mFingerprint() {
         const list = this.props.record.data[this.props.name];
         const records = (list && list.records) ? list.records : [];
         return records.map(r => {
-            const tid = r.data.tooth_id ? r.data.tooth_id[0] : null;
+            const tid = this._extractToothId(r.data.tooth_id);
             return `${r.resId || "new"}|${tid}|${r.data.surface}|${r.data.phase}|${r.data.state}|${r.data.notes || ""}`;
         }).join("§");
     }
@@ -93,8 +104,11 @@ export class OdontogramField extends Component {
         const records = (list && list.records) ? list.records : [];
         this.localState.rows = records.map(r => {
             let fdi = r.data.tooth_fdi_code;
-            if (!fdi && r.data.tooth_id) {
-                fdi = this.fdiByToothId[r.data.tooth_id[0]] || "";
+            if (!fdi) {
+                const toothId = this._extractToothId(r.data.tooth_id);
+                if (toothId != null) {
+                    fdi = this.fdiByToothId[toothId] || "";
+                }
             }
             return {
                 id: r.resId || null,
