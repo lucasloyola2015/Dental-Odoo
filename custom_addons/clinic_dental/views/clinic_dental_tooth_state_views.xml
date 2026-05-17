@@ -6,9 +6,11 @@
             <field name="name">clinic.dental.tooth.state.list</field>
             <field name="model">clinic.dental.tooth.state</field>
             <field name="arch" type="xml">
-                <list string="Odontograma" editable="bottom">
+                <list string="Odontograma" editable="bottom" decoration-danger="phase=='planned'" decoration-info="phase=='realized'">
                     <field name="tooth_id" options="{'no_create': True}"/>
+                    <field name="surface"/>
                     <field name="state"/>
+                    <field name="phase" widget="badge"/>
                     <field name="notes" optional="show"/>
                     <field name="last_updated" optional="hide" readonly="1"/>
                 </list>
@@ -19,15 +21,17 @@
             <field name="name">clinic.dental.tooth.state.form</field>
             <field name="model">clinic.dental.tooth.state</field>
             <field name="arch" type="xml">
-                <form string="Estado de pieza">
+                <form string="Estado de superficie">
                     <sheet>
                         <group>
                             <group>
                                 <field name="patient_id" options="{'no_create': True}"/>
                                 <field name="tooth_id" options="{'no_create': True}"/>
-                                <field name="state"/>
+                                <field name="surface"/>
                             </group>
                             <group>
+                                <field name="state"/>
+                                <field name="phase"/>
                                 <field name="last_updated" readonly="1"/>
                             </group>
                         </group>
@@ -35,6 +39,30 @@
                     </sheet>
                     <chatter/>
                 </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_dental_tooth_state_search" model="ir.ui.view">
+            <field name="name">clinic.dental.tooth.state.search</field>
+            <field name="model">clinic.dental.tooth.state</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="patient_id"/>
+                    <field name="tooth_id"/>
+                    <separator/>
+                    <filter name="filter_planned" string="Previstos (rojo)" domain="[('phase', '=', 'planned')]"/>
+                    <filter name="filter_realized" string="Realizados (azul)" domain="[('phase', '=', 'realized')]"/>
+                    <separator/>
+                    <filter name="filter_caries" string="Caries" domain="[('state', '=', 'caries')]"/>
+                    <filter name="filter_restoration" string="Obturaciones" domain="[('state', '=', 'restoration')]"/>
+                    <filter name="filter_extraction" string="Extracciones / Ausentes" domain="[('state', 'in', ('extraction', 'missing'))]"/>
+                    <group>
+                        <filter name="group_by_patient" string="Paciente" domain="[]" context="{'group_by': 'patient_id'}"/>
+                        <filter name="group_by_tooth" string="Pieza" domain="[]" context="{'group_by': 'tooth_id'}"/>
+                        <filter name="group_by_state" string="Estado" domain="[]" context="{'group_by': 'state'}"/>
+                        <filter name="group_by_phase" string="Fase" domain="[]" context="{'group_by': 'phase'}"/>
+                    </group>
+                </search>
             </field>
         </record>
 

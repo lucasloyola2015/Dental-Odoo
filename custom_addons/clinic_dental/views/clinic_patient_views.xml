@@ -11,15 +11,24 @@
                 <xpath expr="//notebook/page[@name='notes']" position="before">
                     <page string="Odontograma" name="dental_chart">
                         <div class="text-muted mb-2">
-                            Estado actual de cada pieza dentaria. Una sola fila por (paciente, pieza).
-                            Cuando se cambia el estado, se actualiza automáticamente la fecha.
+                            Estado por superficie de cada pieza dentaria. Cada fila es una
+                            superficie en una fase (previsto/realizado). Una misma superficie
+                            puede tener ambas fases en simultáneo (ej: caries observada +
+                            obturación prevista).
+                            <br/>
+                            <span class="text-danger">Filas rojas</span> = previsto / observado.
+                            <span class="text-info">Filas celestes</span> = realizado / existente.
                         </div>
                         <field name="dental_tooth_state_ids" context="{'default_patient_id': id}">
-                            <list editable="bottom">
+                            <list editable="bottom"
+                                  decoration-danger="phase=='planned'"
+                                  decoration-info="phase=='realized'">
                                 <field name="tooth_id" options="{'no_create': True}"/>
+                                <field name="surface"/>
                                 <field name="state"/>
+                                <field name="phase" widget="badge"/>
                                 <field name="notes" optional="show"/>
-                                <field name="last_updated" optional="show" readonly="1"/>
+                                <field name="last_updated" optional="hide" readonly="1"/>
                             </list>
                         </field>
                     </page>
