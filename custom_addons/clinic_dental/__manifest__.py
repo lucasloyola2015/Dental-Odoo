@@ -28,6 +28,8 @@ Incluye:
     ],
     'assets': {
         'web.assets_backend': [
+            'clinic_dental/static/src/components/odontogram/odontogram_popover.js',
+            'clinic_dental/static/src/components/odontogram/odontogram_popover.xml',
             'clinic_dental/static/src/components/odontogram/odontogram.js',
             'clinic_dental/static/src/components/odontogram/odontogram.xml',
             'clinic_dental/static/src/components/odontogram/odontogram.scss',

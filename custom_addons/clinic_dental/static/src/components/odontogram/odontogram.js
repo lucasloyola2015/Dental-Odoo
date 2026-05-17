@@ -1,87 +1,89 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component } from "@odoo/owl";
+import { Component, onWillStart } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { useService } from "@web/core/utils/hooks";
+import { usePopover } from "@web/core/popover/popover_hook";
+import { OdontogramPopover } from "./odontogram_popover";
 
 /**
- * OdontogramField — read-only SVG odontogram widget.
+ * OdontogramField — SVG odontogram with click-to-edit.
  *
- * Field widget for a One2many to clinic.dental.tooth.state. Renders the
- * 52 FDI teeth (32 permanent + 20 deciduous) in the classical 4-quadrant
- * layout with deciduous nested inside permanent. Each tooth has 5 clickable
- * surfaces; surfaces are filled with a color derived from (state, phase).
+ * Renders 52 FDI teeth (32 permanent + 20 deciduous) in the classical
+ * 4-quadrant layout. Each tooth has 5 surfaces filled by (state, phase).
+ * Click on a surface -> OdontogramPopover with state/phase/notes editors.
+ * Persistence is via direct ORM calls (clinic.dental.tooth.state CRUD)
+ * followed by a record reload so the SVG re-renders.
  *
- * Iteration B = read-only display. Iteration C will add edit-from-SVG.
+ * Note: requires the patient record to be already saved (resId truthy);
+ * otherwise click-to-edit is a no-op. The user can still edit via the
+ * tabular list below.
  */
 export class OdontogramField extends Component {
     static template = "clinic_dental.OdontogramField";
     static props = { ...standardFieldProps };
 
-    setup() {
-        // No reactive state needed for iteration B.
-    }
+    static TOOTH_W = 36;
+    static TOOTH_SPACING = 2;
+    static MIDLINE_X = 380;
 
-    // --- Layout (rows, left half then right half of mouth) ---
-    static UPPER_PERM = {
-        right: [18, 17, 16, 15, 14, 13, 12, 11],
-        left:  [21, 22, 23, 24, 25, 26, 27, 28],
-    };
-    static UPPER_TEMP = {
-        right: [55, 54, 53, 52, 51],
-        left:  [61, 62, 63, 64, 65],
-    };
-    static LOWER_PERM = {
-        right: [48, 47, 46, 45, 44, 43, 42, 41],
-        left:  [31, 32, 33, 34, 35, 36, 37, 38],
-    };
-    static LOWER_TEMP = {
-        right: [85, 84, 83, 82, 81],
-        left:  [71, 72, 73, 74, 75],
-    };
+    static ROWS = [
+        { y:  20, isUpper: true,  isDeciduous: true,
+          right: [55, 54, 53, 52, 51], left: [61, 62, 63, 64, 65] },
+        { y:  70, isUpper: true,  isDeciduous: false,
+          right: [18, 17, 16, 15, 14, 13, 12, 11], left: [21, 22, 23, 24, 25, 26, 27, 28] },
+        { y: 130, isUpper: false, isDeciduous: false,
+          right: [48, 47, 46, 45, 44, 43, 42, 41], left: [31, 32, 33, 34, 35, 36, 37, 38] },
+        { y: 180, isUpper: false, isDeciduous: true,
+          right: [85, 84, 83, 82, 81], left: [71, 72, 73, 74, 75] },
+    ];
 
-    static SURFACES = ["occlusal", "mesial", "distal", "buccal", "lingual"];
-
-    // (state, phase) -> CSS fill color. Red family = planned; Blue family = realized.
-    static COLOR_MAP = {
+    static COLOR = {
         planned: {
-            caries:        "#dc3545",  // red
-            restoration:   "#dc3545",
-            endodontic:    "#dc3545",
-            crown:         "#dc3545",
-            prosthesis:    "#dc3545",
-            implant:       "#dc3545",
-            extraction:    "#dc3545",
-            root_fragment: "#dc3545",
-            missing:       "#dc3545",
+            caries: "#dc3545", restoration: "#dc3545", endodontic: "#dc3545",
+            crown: "#dc3545", prosthesis: "#dc3545", implant: "#dc3545",
+            extraction: "#dc3545", root_fragment: "#dc3545", missing: "#dc3545",
         },
         realized: {
-            caries:        "#6c757d",  // gray (rare: untreated caries observed historically)
-            restoration:   "#0d6efd",  // blue
-            endodontic:    "#0d6efd",
-            crown:         "#0d6efd",
-            prosthesis:    "#0d6efd",
-            implant:       "#0d6efd",
-            extraction:    "#0d6efd",
-            root_fragment: "#6c757d",
-            missing:       "#0d6efd",
+            caries: "#6c757d", restoration: "#0d6efd", endodontic: "#0d6efd",
+            crown: "#0d6efd", prosthesis: "#0d6efd", implant: "#0d6efd",
+            extraction: "#0d6efd", root_fragment: "#6c757d", missing: "#0d6efd",
         },
     };
 
-    /**
-     * Build a lookup: { fdi_code: { surface: [stateRecord, ...] } }
-     * Both phases for the same surface are stored, planned first.
-     */
+    setup() {
+        this.orm = useService("orm");
+        this.popover = usePopover(OdontogramPopover);
+        this.fdiToToothId = {};
+        onWillStart(async () => {
+            const teeth = await this.orm.searchRead(
+                "clinic.dental.tooth", [], ["id", "fdi_code"]
+            );
+            for (const t of teeth) {
+                this.fdiToToothId[t.fdi_code] = t.id;
+            }
+        });
+    }
+
+    get topPath()    { return "M0,0 L36,0 L24,12 L12,12 Z"; }
+    get rightPath()  { return "M36,0 L36,36 L24,24 L24,12 Z"; }
+    get bottomPath() { return "M36,36 L0,36 L12,24 L24,24 Z"; }
+    get leftPath()   { return "M0,36 L0,0 L12,12 L12,24 Z"; }
+
+    /** Map { fdi: { surface: [{id, state, phase, notes}, ...] } } from the O2m records. */
     get statesByTooth() {
-        const records = this.props.record.data[this.props.name].records;
+        const list = this.props.record.data[this.props.name];
+        const records = (list && list.records) ? list.records : [];
         const map = {};
         for (const r of records) {
             const fdi = r.data.tooth_fdi_code;
             if (!fdi) continue;
-            if (!map[fdi]) map[fdi] = {};
             const surf = r.data.surface;
-            if (!map[fdi][surf]) map[fdi][surf] = [];
+            map[fdi] = map[fdi] || {};
+            map[fdi][surf] = map[fdi][surf] || [];
             map[fdi][surf].push({
+                id: r.resId,
                 state: r.data.state,
                 phase: r.data.phase,
                 notes: r.data.notes || "",
@@ -90,48 +92,91 @@ export class OdontogramField extends Component {
         return map;
     }
 
-    /**
-     * Return the fill color for a (fdi, surface) cell. If both planned and
-     * realized exist for the same surface, realized takes precedence visually
-     * (it represents the most recent fact about the surface).
-     */
-    surfaceFill(fdi, surface) {
+    fill(fdi, surface) {
         const states = (this.statesByTooth[fdi] || {})[surface] || [];
         const realized = states.find(s => s.phase === "realized");
         const planned  = states.find(s => s.phase === "planned");
-        if (realized) return OdontogramField.COLOR_MAP.realized[realized.state] || "#999";
-        if (planned)  return OdontogramField.COLOR_MAP.planned[planned.state]   || "#dc3545";
+        if (realized) return OdontogramField.COLOR.realized[realized.state] || "#999";
+        if (planned)  return OdontogramField.COLOR.planned[planned.state]   || "#dc3545";
         return "#ffffff";
     }
 
-    /** Tooltip text for a (fdi, surface) cell. */
-    surfaceTooltip(fdi, surface) {
+    tooltip(fdi, surface) {
         const states = (this.statesByTooth[fdi] || {})[surface] || [];
-        if (!states.length) return `${fdi} · ${surface}`;
+        if (!states.length) return `${fdi} · ${surface} (click para registrar)`;
         const parts = states.map(s => `${s.state} (${s.phase === "planned" ? "previsto" : "realizado"})`);
         return `${fdi} · ${surface}: ${parts.join(" + ")}`;
     }
 
-    /** Helper used by the template iteration: gives x-position of a tooth in its row. */
-    toothX(index, options = {}) {
-        const TOOTH_W = 36;
-        const SPACING = 2;
-        const offset = options.offsetCenter ? (3 * (TOOTH_W + SPACING)) : 0;
-        return index * (TOOTH_W + SPACING) + offset;
+    get positionedTeeth() {
+        const items = [];
+        const W = OdontogramField.TOOTH_W;
+        const S = OdontogramField.TOOTH_SPACING;
+        const M = OdontogramField.MIDLINE_X;
+        for (const row of OdontogramField.ROWS) {
+            row.right.forEach((fdi, i) => {
+                const x = M - (i + 1) * (W + S);
+                items.push(this._buildTooth(fdi, x, row));
+            });
+            row.left.forEach((fdi, i) => {
+                const x = M + i * (W + S) + S;
+                items.push(this._buildTooth(fdi, x, row));
+            });
+        }
+        return items;
     }
 
-    /** Provide rows to the template in order. */
-    get rows() {
-        return [
-            { y: 5,   teeth: OdontogramField.UPPER_TEMP.right, offsetCenter: true,  label: "Temp. sup. der." },
-            { y: 5,   teeth: OdontogramField.UPPER_TEMP.left,  offsetCenter: true,  label: "Temp. sup. izq.", side: "left" },
-            { y: 55,  teeth: OdontogramField.UPPER_PERM.right, offsetCenter: false, label: "Perm. sup. der." },
-            { y: 55,  teeth: OdontogramField.UPPER_PERM.left,  offsetCenter: false, label: "Perm. sup. izq.", side: "left" },
-            { y: 110, teeth: OdontogramField.LOWER_PERM.right, offsetCenter: false, label: "Perm. inf. der." },
-            { y: 110, teeth: OdontogramField.LOWER_PERM.left,  offsetCenter: false, label: "Perm. inf. izq.", side: "left" },
-            { y: 160, teeth: OdontogramField.LOWER_TEMP.right, offsetCenter: true,  label: "Temp. inf. der." },
-            { y: 160, teeth: OdontogramField.LOWER_TEMP.left,  offsetCenter: true,  label: "Temp. inf. izq.", side: "left" },
-        ];
+    _buildTooth(fdi, x, row) {
+        const topSurface    = row.isUpper ? "buccal"  : "lingual";
+        const bottomSurface = row.isUpper ? "lingual" : "buccal";
+        const inLeftHalf = row.left.includes(fdi);
+        const leftSurface  = inLeftHalf ? "distal" : "mesial";
+        const rightSurface = inLeftHalf ? "mesial" : "distal";
+        const labelY = row.isUpper ? -4 : 50;
+        return {
+            fdi: String(fdi),
+            transform: `translate(${x}, ${row.y})`,
+            labelY: labelY,
+            // Surface name per zone (for click handler):
+            surfaceTop: topSurface, surfaceRight: rightSurface,
+            surfaceBottom: bottomSurface, surfaceLeft: leftSurface,
+            // Pre-computed fills:
+            fillTop:    this.fill(fdi, topSurface),
+            fillRight:  this.fill(fdi, rightSurface),
+            fillBottom: this.fill(fdi, bottomSurface),
+            fillLeft:   this.fill(fdi, leftSurface),
+            fillCenter: this.fill(fdi, "occlusal"),
+            // Tooltips:
+            tooltipTop:    this.tooltip(fdi, topSurface),
+            tooltipRight:  this.tooltip(fdi, rightSurface),
+            tooltipBottom: this.tooltip(fdi, bottomSurface),
+            tooltipLeft:   this.tooltip(fdi, leftSurface),
+            tooltipCenter: this.tooltip(fdi, "occlusal"),
+        };
+    }
+
+    /** Click handler: opens the popover anchored to the clicked zone. */
+    async onSurfaceClick(ev, fdi, surface) {
+        ev.stopPropagation();
+        const patientId = this.props.record.resId;
+        if (!patientId) {
+            // Patient not yet saved — bail. The bottom table is the fallback.
+            return;
+        }
+        const toothId = this.fdiToToothId[fdi];
+        if (!toothId) return;
+        const existing = (this.statesByTooth[fdi] || {})[surface] || [];
+        this.popover.open(ev.currentTarget, {
+            fdi: String(fdi),
+            surface,
+            patientId,
+            toothId,
+            existing,
+            onChange: async () => {
+                // Reload only the One2many records so the SVG re-renders.
+                await this.props.record.load();
+            },
+        });
     }
 }
 

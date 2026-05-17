@@ -4,56 +4,41 @@
     <t t-name="clinic_dental.OdontogramField">
         <div class="o_odontogram_widget">
             <div class="o_odontogram_chart">
-                <svg viewBox="0 0 700 220" class="o_odontogram_svg" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Vertical midline (separates right/left halves of the mouth) -->
-                    <line x1="350" y1="0" x2="350" y2="220" stroke="#666" stroke-width="1.5" stroke-dasharray="4 3"/>
-                    <!-- Horizontal midline (separates upper/lower jaw) -->
-                    <line x1="0" y1="100" x2="700" y2="100" stroke="#666" stroke-width="1.5"/>
+                <svg viewBox="0 0 760 240" class="o_odontogram_svg" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="380" y1="0" x2="380" y2="240" stroke="#666" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <line x1="0" y1="120" x2="760" y2="120" stroke="#666" stroke-width="1.5"/>
 
-                    <t t-foreach="rows" t-as="row" t-key="row_index">
-                        <t t-foreach="row.teeth" t-as="fdi" t-key="fdi">
-                            <t t-set="x0" t-value="toothX(fdi_index, {offsetCenter: row.offsetCenter})"/>
-                            <t t-set="x" t-value="row.side === 'left' ? 360 + x0 : 340 - x0 - 36"/>
-                            <g t-attf-transform="translate({{x}}, {{row.y}})">
-                                <!-- Tooth number above the upper-jaw rows, below the lower-jaw rows -->
-                                <text t-attf-x="18" t-attf-y="{{row.y &lt; 100 ? -4 : 50}}"
-                                      text-anchor="middle" font-size="10" fill="#333"
-                                      t-out="fdi"/>
-
-                                <!-- 5 surface zones forming a 36×36 tooth.
-                                     occlusal = center square, the rest are triangles. -->
-                                <!-- Top triangle (vestibular for upper, lingual for lower) -->
-                                <path d="M0,0 L36,0 L24,12 L12,12 Z"
-                                      t-att-fill="surfaceFill(fdi, row.y &lt; 100 ? 'buccal' : 'lingual')"
-                                      stroke="#333" stroke-width="0.8">
-                                    <title t-out="surfaceTooltip(fdi, row.y &lt; 100 ? 'buccal' : 'lingual')"/>
-                                </path>
-                                <!-- Right triangle (mesial for left half, distal for right half) -->
-                                <path d="M36,0 L36,36 L24,24 L24,12 Z"
-                                      t-att-fill="surfaceFill(fdi, row.side === 'left' ? 'mesial' : 'distal')"
-                                      stroke="#333" stroke-width="0.8">
-                                    <title t-out="surfaceTooltip(fdi, row.side === 'left' ? 'mesial' : 'distal')"/>
-                                </path>
-                                <!-- Bottom triangle (lingual for upper, vestibular for lower) -->
-                                <path d="M36,36 L0,36 L12,24 L24,24 Z"
-                                      t-att-fill="surfaceFill(fdi, row.y &lt; 100 ? 'lingual' : 'buccal')"
-                                      stroke="#333" stroke-width="0.8">
-                                    <title t-out="surfaceTooltip(fdi, row.y &lt; 100 ? 'lingual' : 'buccal')"/>
-                                </path>
-                                <!-- Left triangle (distal for left half, mesial for right half) -->
-                                <path d="M0,36 L0,0 L12,12 L12,24 Z"
-                                      t-att-fill="surfaceFill(fdi, row.side === 'left' ? 'distal' : 'mesial')"
-                                      stroke="#333" stroke-width="0.8">
-                                    <title t-out="surfaceTooltip(fdi, row.side === 'left' ? 'distal' : 'mesial')"/>
-                                </path>
-                                <!-- Center square (occlusal / incisal edge) -->
-                                <rect x="12" y="12" width="12" height="12"
-                                      t-att-fill="surfaceFill(fdi, 'occlusal')"
-                                      stroke="#333" stroke-width="0.8">
-                                    <title t-out="surfaceTooltip(fdi, 'occlusal')"/>
-                                </rect>
-                            </g>
-                        </t>
+                    <t t-foreach="positionedTeeth" t-as="t" t-key="t.fdi">
+                        <g t-att-transform="t.transform">
+                            <text t-att-x="18" t-att-y="t.labelY" text-anchor="middle" font-size="10" fill="#333">
+                                <t t-esc="t.fdi"/>
+                            </text>
+                            <path t-att-d="topPath" t-att-fill="t.fillTop" stroke="#333" stroke-width="0.8"
+                                  style="cursor: pointer;"
+                                  t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, t.surfaceTop)">
+                                <title><t t-esc="t.tooltipTop"/></title>
+                            </path>
+                            <path t-att-d="rightPath" t-att-fill="t.fillRight" stroke="#333" stroke-width="0.8"
+                                  style="cursor: pointer;"
+                                  t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, t.surfaceRight)">
+                                <title><t t-esc="t.tooltipRight"/></title>
+                            </path>
+                            <path t-att-d="bottomPath" t-att-fill="t.fillBottom" stroke="#333" stroke-width="0.8"
+                                  style="cursor: pointer;"
+                                  t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, t.surfaceBottom)">
+                                <title><t t-esc="t.tooltipBottom"/></title>
+                            </path>
+                            <path t-att-d="leftPath" t-att-fill="t.fillLeft" stroke="#333" stroke-width="0.8"
+                                  style="cursor: pointer;"
+                                  t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, t.surfaceLeft)">
+                                <title><t t-esc="t.tooltipLeft"/></title>
+                            </path>
+                            <rect x="12" y="12" width="12" height="12" t-att-fill="t.fillCenter" stroke="#333" stroke-width="0.8"
+                                  style="cursor: pointer;"
+                                  t-on-click="(ev) =&gt; this.onSurfaceClick(ev, t.fdi, 'occlusal')">
+                                <title><t t-esc="t.tooltipCenter"/></title>
+                            </rect>
+                        </g>
                     </t>
                 </svg>
             </div>
@@ -62,7 +47,7 @@
                 <strong>Leyenda:</strong>
                 <span class="badge bg-danger me-1">Rojo</span> Previsto / observado.
                 <span class="badge bg-primary me-1 ms-2">Azul</span> Realizado / existente.
-                <span class="text-muted ms-3">Blanco = sana (sin registro)</span>
+                <span class="text-muted ms-3">Blanco = sin registro. Click en cualquier superficie para editar.</span>
             </div>
         </div>
     </t>

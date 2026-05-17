@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="clinic_dental.OdontogramPopover">
+        <div class="o_odontogram_popover p-2" style="min-width: 280px;">
+            <h6 class="mb-2">
+                Pieza <strong t-esc="props.fdi"/> — <span t-esc="surfaceLabel"/>
+            </h6>
+
+            <div class="mb-2">
+                <label class="form-label small mb-1">Fase</label>
+                <select class="form-select form-select-sm" t-on-change="onPhaseChange" t-att-value="state.phase">
+                    <t t-foreach="phaseOptions" t-as="opt" t-key="opt[0]">
+                        <option t-att-value="opt[0]" t-att-selected="opt[0] === state.phase">
+                            <t t-esc="opt[1]"/>
+                        </option>
+                    </t>
+                </select>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label small mb-1">Estado</label>
+                <select class="form-select form-select-sm" t-model="state.stateValue">
+                    <t t-foreach="stateOptions" t-as="opt" t-key="opt[0]">
+                        <option t-att-value="opt[0]"><t t-esc="opt[1]"/></option>
+                    </t>
+                </select>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label small mb-1">Notas</label>
+                <textarea class="form-control form-control-sm" rows="2" t-model="state.notes" placeholder="Notas clínicas..."/>
+            </div>
+
+            <div class="d-flex justify-content-between gap-2 mt-3">
+                <button class="btn btn-sm btn-secondary" t-on-click="() =&gt; props.close()" t-att-disabled="state.saving">
+                    Cancelar
+                </button>
+                <div class="d-flex gap-1">
+                    <button t-if="matchingExisting" class="btn btn-sm btn-outline-danger" t-on-click="remove" t-att-disabled="state.saving">
+                        Eliminar
+                    </button>
+                    <button class="btn btn-sm btn-primary" t-on-click="save" t-att-disabled="state.saving">
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
