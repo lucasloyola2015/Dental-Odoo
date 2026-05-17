@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_dental_tooth_list" model="ir.ui.view">
+            <field name="name">clinic.dental.tooth.list</field>
+            <field name="model">clinic.dental.tooth</field>
+            <field name="arch" type="xml">
+                <list string="Piezas dentarias (FDI)" create="false" delete="false">
+                    <field name="fdi_code"/>
+                    <field name="name"/>
+                    <field name="arch"/>
+                    <field name="quadrant"/>
+                    <field name="position"/>
+                    <field name="tooth_type"/>
+                    <field name="dentition"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_dental_tooth_form" model="ir.ui.view">
+            <field name="name">clinic.dental.tooth.form</field>
+            <field name="model">clinic.dental.tooth</field>
+            <field name="arch" type="xml">
+                <form string="Pieza dentaria" create="false" delete="false">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="fdi_code"/>
+                            <h1>
+                                <field name="fdi_code" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name" readonly="1"/>
+                                <field name="dentition" readonly="1"/>
+                                <field name="tooth_type" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="arch" readonly="1"/>
+                                <field name="quadrant" readonly="1"/>
+                                <field name="position" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_clinic_dental_tooth_search" model="ir.ui.view">
+            <field name="name">clinic.dental.tooth.search</field>
+            <field name="model">clinic.dental.tooth</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="fdi_code"/>
+                    <field name="name"/>
+                    <filter name="filter_permanent" string="Permanentes" domain="[('dentition', '=', 'permanent')]"/>
+                    <filter name="filter_deciduous" string="Temporales" domain="[('dentition', '=', 'deciduous')]"/>
+                    <separator/>
+                    <filter name="filter_upper" string="Arcada superior" domain="[('arch', '=', 'upper')]"/>
+                    <filter name="filter_lower" string="Arcada inferior" domain="[('arch', '=', 'lower')]"/>
+                    <group>
+                        <filter name="group_by_quadrant" string="Cuadrante" domain="[]" context="{'group_by': 'quadrant'}"/>
+                        <filter name="group_by_type" string="Tipo" domain="[]" context="{'group_by': 'tooth_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_dental_tooth" model="ir.actions.act_window">
+            <field name="name">Piezas dentarias (FDI)</field>
+            <field name="res_model">clinic.dental.tooth</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_clinic_dental_tooth_search"/>
+        </record>
+
+        <menuitem
+            id="menu_clinic_dental_tooth"
+            name="Piezas dentarias (FDI)"
+            parent="clinic_core.menu_clinic_config_structure"
+            action="action_clinic_dental_tooth"
+            sequence="40"/>
+
+    </data>
+</odoo>

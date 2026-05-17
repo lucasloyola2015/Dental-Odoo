@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit the appointment form to expose tooth_ids -->
+        <record id="view_clinic_appointment_form_dental" model="ir.ui.view">
+            <field name="name">clinic.appointment.form.dental</field>
+            <field name="model">clinic.appointment</field>
+            <field name="inherit_id" ref="clinic_core.view_clinic_appointment_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='notes']" position="before">
+                    <page string="Piezas atendidas" name="teeth">
+                        <div class="text-muted mb-2">
+                            Piezas dentarias involucradas en esta práctica. Vacío si no aplica
+                            (consulta general, limpieza, etc.).
+                        </div>
+                        <field name="tooth_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

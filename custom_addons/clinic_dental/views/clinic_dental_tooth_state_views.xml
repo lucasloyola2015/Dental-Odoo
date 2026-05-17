@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_dental_tooth_state_list" model="ir.ui.view">
+            <field name="name">clinic.dental.tooth.state.list</field>
+            <field name="model">clinic.dental.tooth.state</field>
+            <field name="arch" type="xml">
+                <list string="Odontograma" editable="bottom">
+                    <field name="tooth_id" options="{'no_create': True}"/>
+                    <field name="state"/>
+                    <field name="notes" optional="show"/>
+                    <field name="last_updated" optional="hide" readonly="1"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_dental_tooth_state_form" model="ir.ui.view">
+            <field name="name">clinic.dental.tooth.state.form</field>
+            <field name="model">clinic.dental.tooth.state</field>
+            <field name="arch" type="xml">
+                <form string="Estado de pieza">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="patient_id" options="{'no_create': True}"/>
+                                <field name="tooth_id" options="{'no_create': True}"/>
+                                <field name="state"/>
+                            </group>
+                            <group>
+                                <field name="last_updated" readonly="1"/>
+                            </group>
+                        </group>
+                        <field name="notes" placeholder="Notas clínicas..."/>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

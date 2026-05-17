@@ -18,7 +18,14 @@ Incluye:
     'depends': [
         'clinic_core',
     ],
-    'data': [],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/clinic_dental_tooth_views.xml',
+        'views/clinic_dental_tooth_state_views.xml',
+        'views/clinic_patient_views.xml',
+        'views/clinic_appointment_views.xml',
+        'data/clinic_dental_tooth_data.xml',
+    ],
     'installable': True,
     'application': True,
     'auto_install': False,

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clinic_dental_tooth_secretariat,clinic.dental.tooth secretariat,model_clinic_dental_tooth,clinic_core.group_clinic_secretariat,1,0,0,0
+access_clinic_dental_tooth_admin,clinic.dental.tooth admin,model_clinic_dental_tooth,clinic_core.group_clinic_admin,1,1,1,1
+access_clinic_dental_tooth_state_secretariat,clinic.dental.tooth.state secretariat,model_clinic_dental_tooth_state,clinic_core.group_clinic_secretariat,1,1,1,1
+access_clinic_dental_tooth_state_admin,clinic.dental.tooth.state admin,model_clinic_dental_tooth_state,clinic_core.group_clinic_admin,1,1,1,1

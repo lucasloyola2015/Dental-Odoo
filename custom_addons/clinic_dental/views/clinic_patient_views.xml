@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit the patient form and add an "Odontograma" tab -->
+        <record id="view_clinic_patient_form_dental" model="ir.ui.view">
+            <field name="name">clinic.patient.form.dental</field>
+            <field name="model">clinic.patient</field>
+            <field name="inherit_id" ref="clinic_core.view_clinic_patient_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='notes']" position="before">
+                    <page string="Odontograma" name="dental_chart">
+                        <div class="text-muted mb-2">
+                            Estado actual de cada pieza dentaria. Una sola fila por (paciente, pieza).
+                            Cuando se cambia el estado, se actualiza automáticamente la fecha.
+                        </div>
+                        <field name="dental_tooth_state_ids" context="{'default_patient_id': id}">
+                            <list editable="bottom">
+                                <field name="tooth_id" options="{'no_create': True}"/>
+                                <field name="state"/>
+                                <field name="notes" optional="show"/>
+                                <field name="last_updated" optional="show" readonly="1"/>
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
