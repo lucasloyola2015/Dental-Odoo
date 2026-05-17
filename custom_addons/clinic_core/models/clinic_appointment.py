@@ -780,7 +780,8 @@ class ClinicAppointment(models.Model):
         data = self._f1_aoss_field_data()
         pdf_bytes = render_f1_aoss(data)
 
-        filename = "F1_AOSS_%s.pdf" % (self.name or "turno").replace("/", "-")
+        safe_name = (self.display_name or ("turno-%d" % self.id)).replace("/", "-").replace(" ", "_")
+        filename = "F1_AOSS_%s.pdf" % safe_name[:80]
         attachment = self.env["ir.attachment"].create({
             "name": filename,
             "type": "binary",
