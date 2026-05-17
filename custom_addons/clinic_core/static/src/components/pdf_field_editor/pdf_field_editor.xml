@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="clinic_core.PdfFieldEditor">
+        <div class="o_pdf_field_editor">
+            <div t-if="!hasPreview" class="alert alert-warning">
+                No hay vista previa cargada. Subí un PNG en el campo "Vista previa (PNG)"
+                o ejecutá el hook que renderiza el PDF automáticamente.
+            </div>
+            <div t-else="" class="o_pdf_canvas_wrap">
+                <div class="text-muted small mb-2">
+                    Arrastrá un marcador para reposicionarlo. Doble-click para cambiar
+                    el tamaño de font. Las coordenadas se guardan automáticamente en cada
+                    movimiento.
+                </div>
+                <div class="o_pdf_canvas" t-ref="canvas">
+                    <img t-att-src="previewUrl" draggable="false" class="o_pdf_preview"/>
+                    <t t-foreach="fields" t-as="rec" t-key="_keyOf(rec)">
+                        <div class="o_pdf_marker"
+                             t-att-class="state.draggingKey === _keyOf(rec) ? 'o_pdf_marker_active' : ''"
+                             t-att-style="markerStyle(rec)"
+                             t-on-mousedown="(ev) => this.onMarkerMouseDown(ev, rec)"
+                             t-on-dblclick="(ev) => this.onMarkerDoubleClick(ev, rec)">
+                            <span class="o_pdf_marker_label" t-esc="rec.data.label || rec.data.field_key"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

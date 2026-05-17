@@ -64,6 +64,13 @@ en este módulo.
     "external_dependencies": {
         "python": ["reportlab", "PyPDF2"],
     },
+    "assets": {
+        "web.assets_backend": [
+            "clinic_core/static/src/components/pdf_field_editor/pdf_field_editor.js",
+            "clinic_core/static/src/components/pdf_field_editor/pdf_field_editor.xml",
+            "clinic_core/static/src/components/pdf_field_editor/pdf_field_editor.scss",
+        ],
+    },
     "post_init_hook": "_post_init_hook",
     "installable": True,
     "application": True,

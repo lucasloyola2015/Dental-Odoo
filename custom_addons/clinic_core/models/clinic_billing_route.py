@@ -38,6 +38,20 @@ class ClinicBillingRoute(models.Model):
         help="PDF original del formulario (ej. F1 AOSS). Se sobreimprime con los datos del turno al facturar.",
     )
     pdf_template_filename = fields.Char(string="Nombre archivo")
+    pdf_preview_image = fields.Binary(
+        string="Vista previa (PNG)",
+        help=(
+            "Render del PDF como imagen, usada por el editor visual de coordenadas. "
+            "Si está vacía, el editor visual no funciona — generar con un conversor "
+            "PDF→PNG y subirla acá, o re-correr el post_init hook."
+        ),
+    )
+    pdf_preview_scale = fields.Float(
+        string="Escala preview",
+        default=2.0,
+        help="Factor de escala usado al renderizar la PNG (1.0 = 72 DPI, 2.0 = 144 DPI). "
+             "El editor multiplica las coordenadas pt × esta escala para posicionar los marcadores.",
+    )
     pdf_field_ids = fields.One2many(
         comodel_name="clinic.billing.route.pdf.field",
         inverse_name="billing_route_id",
