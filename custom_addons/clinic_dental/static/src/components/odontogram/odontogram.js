@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -10,15 +10,11 @@ import { OdontogramPopover } from "./odontogram_popover";
 /**
  * OdontogramField — SVG odontogram with click-to-edit.
  *
- * Renders 52 FDI teeth (32 permanent + 20 deciduous) in the classical
- * 4-quadrant layout. Each tooth has 5 surfaces filled by (state, phase).
- * Click on a surface -> OdontogramPopover with state/phase/notes editors.
- * Persistence is via direct ORM calls (clinic.dental.tooth.state CRUD)
- * followed by a record reload so the SVG re-renders.
- *
- * Note: requires the patient record to be already saved (resId truthy);
- * otherwise click-to-edit is a no-op. The user can still edit via the
- * tabular list below.
+ * Owns its own copy of the state list (`useState`) which it loads via
+ * searchRead on init and re-loads after every popover save/delete.
+ * This guarantees the SVG re-renders even when changes are made
+ * outside the parent record's O2m. The parent record is also reloaded
+ * so the tabular list below stays in sync.
  */
 export class OdontogramField extends Component {
     static template = "clinic_dental.OdontogramField";
@@ -56,6 +52,8 @@ export class OdontogramField extends Component {
         this.orm = useService("orm");
         this.popover = usePopover(OdontogramPopover);
         this.fdiToToothId = {};
+        this.localState = useState({ rows: [] });
+
         onWillStart(async () => {
             const teeth = await this.orm.searchRead(
                 "clinic.dental.tooth", [], ["id", "fdi_code"]
@@ -63,7 +61,21 @@ export class OdontogramField extends Component {
             for (const t of teeth) {
                 this.fdiToToothId[t.fdi_code] = t.id;
             }
+            await this.refreshLocalStates();
         });
+    }
+
+    async refreshLocalStates() {
+        const patientId = this.props.record.resId;
+        if (!patientId) {
+            this.localState.rows = [];
+            return;
+        }
+        this.localState.rows = await this.orm.searchRead(
+            "clinic.dental.tooth.state",
+            [["patient_id", "=", patientId]],
+            ["id", "tooth_fdi_code", "surface", "phase", "state", "notes"]
+        );
     }
 
     get topPath()    { return "M0,0 L36,0 L24,12 L12,12 Z"; }
@@ -71,23 +83,16 @@ export class OdontogramField extends Component {
     get bottomPath() { return "M36,36 L0,36 L12,24 L24,24 Z"; }
     get leftPath()   { return "M0,36 L0,0 L12,12 L12,24 Z"; }
 
-    /** Map { fdi: { surface: [{id, state, phase, notes}, ...] } } from the O2m records. */
+    /** Build the lookup { fdi: { surface: [{id, state, phase, notes}, ...] } } from local state. */
     get statesByTooth() {
-        const list = this.props.record.data[this.props.name];
-        const records = (list && list.records) ? list.records : [];
         const map = {};
-        for (const r of records) {
-            const fdi = r.data.tooth_fdi_code;
+        for (const r of this.localState.rows) {
+            const fdi = r.tooth_fdi_code;
             if (!fdi) continue;
-            const surf = r.data.surface;
+            const surf = r.surface;
             map[fdi] = map[fdi] || {};
             map[fdi][surf] = map[fdi][surf] || [];
-            map[fdi][surf].push({
-                id: r.resId,
-                state: r.data.state,
-                phase: r.data.phase,
-                notes: r.data.notes || "",
-            });
+            map[fdi][surf].push({ id: r.id, state: r.state, phase: r.phase, notes: r.notes || "" });
         }
         return map;
     }
@@ -137,16 +142,13 @@ export class OdontogramField extends Component {
             fdi: String(fdi),
             transform: `translate(${x}, ${row.y})`,
             labelY: labelY,
-            // Surface name per zone (for click handler):
             surfaceTop: topSurface, surfaceRight: rightSurface,
             surfaceBottom: bottomSurface, surfaceLeft: leftSurface,
-            // Pre-computed fills:
             fillTop:    this.fill(fdi, topSurface),
             fillRight:  this.fill(fdi, rightSurface),
             fillBottom: this.fill(fdi, bottomSurface),
             fillLeft:   this.fill(fdi, leftSurface),
             fillCenter: this.fill(fdi, "occlusal"),
-            // Tooltips:
             tooltipTop:    this.tooltip(fdi, topSurface),
             tooltipRight:  this.tooltip(fdi, rightSurface),
             tooltipBottom: this.tooltip(fdi, bottomSurface),
@@ -155,14 +157,10 @@ export class OdontogramField extends Component {
         };
     }
 
-    /** Click handler: opens the popover anchored to the clicked zone. */
     async onSurfaceClick(ev, fdi, surface) {
         ev.stopPropagation();
         const patientId = this.props.record.resId;
-        if (!patientId) {
-            // Patient not yet saved — bail. The bottom table is the fallback.
-            return;
-        }
+        if (!patientId) return;
         const toothId = this.fdiToToothId[fdi];
         if (!toothId) return;
         const existing = (this.statesByTooth[fdi] || {})[surface] || [];
@@ -173,7 +171,8 @@ export class OdontogramField extends Component {
             toothId,
             existing,
             onChange: async () => {
-                // Reload only the One2many records so the SVG re-renders.
+                // Local refresh -> SVG re-renders. Parent reload -> bottom table syncs.
+                await this.refreshLocalStates();
                 await this.props.record.load();
             },
         });
