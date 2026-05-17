@@ -783,6 +783,80 @@ env["resource.calendar.leaves"].create({
 
 print(f"  Created extras + vacaciones for the 4 calendars.")
 
+# =============================================================================
+# DENTAL TOOTH STATES (only if clinic_dental is installed)
+# =============================================================================
+if "clinic.dental.tooth.state" in env:
+    print("\n[9/9] Cargando odontogramas demo...")
+
+    fdi_to_tooth = {
+        t.fdi_code: t for t in env["clinic.dental.tooth"].search([])
+    }
+
+    def add_tooth_state(patient, fdi, surface, state, phase, notes=""):
+        tooth = fdi_to_tooth.get(fdi)
+        if not tooth:
+            print(f"    WARN: no tooth with FDI {fdi}")
+            return
+        env["clinic.dental.tooth.state"].create({
+            "patient_id": patient.id,
+            "tooth_id": tooth.id,
+            "surface": surface,
+            "state": state,
+            "phase": phase,
+            "notes": notes,
+        })
+
+    # Pedro Mendez — adulto con historial mixto: obturaciones viejas, corona,
+    # endodoncia, implante, una extraccion, un agenesia, y una caries planeada.
+    pedro_states = [
+        ("16", "occlusal", "caries",      "planned",  "A obturar la proxima visita"),
+        ("11", "buccal",   "caries",      "planned",  "Caries incipiente en vestibular"),
+        ("21", "mesial",   "restoration", "realized", "Obturacion compuesta de 2022"),
+        ("24", "distal",   "restoration", "realized", ""),
+        ("26", "occlusal", "restoration", "realized", ""),
+        ("36", "occlusal", "crown",       "realized", "Corona de porcelana 2021"),
+        ("37", "occlusal", "endodontic",  "realized", "Endo 2019, sin sintomas"),
+        ("47", "occlusal", "implant",     "realized", "Implante post-extraccion 2023"),
+        ("18", "occlusal", "extraction",  "realized", "Cordal extraido 2020"),
+        ("28", "occlusal", "missing",     "realized", "Nunca erupciono (agenesia)"),
+    ]
+    for st in pedro_states:
+        add_tooth_state(pedro_patient, *st)
+
+    # Maria Lopez — plan de tratamiento en curso: varias caries previstas,
+    # una obturacion antigua, una endodoncia programada.
+    maria_states = [
+        ("14", "occlusal", "caries",      "planned",  ""),
+        ("15", "occlusal", "caries",      "planned",  ""),
+        ("17", "occlusal", "caries",      "planned",  ""),
+        ("24", "mesial",   "caries",      "planned",  ""),
+        ("26", "occlusal", "restoration", "realized", "Obturacion previa, sin cambios"),
+        ("46", "occlusal", "endodontic",  "planned",  "Endodoncia programada para junio"),
+        ("11", "buccal",   "caries",      "planned",  "Caries cervical"),
+    ]
+    for st in maria_states:
+        add_tooth_state(maria, *st)
+
+    # Lucas Sosa (pediatrico) — dientes temporales con caries y restauraciones,
+    # mas un permanente (primer molar 16) tipico de la edad.
+    lucas_states = [
+        ("54", "occlusal", "caries",      "planned",  "Caries en temporal 54"),
+        ("64", "occlusal", "restoration", "realized", "Obturacion temporal"),
+        ("74", "occlusal", "caries",      "planned",  ""),
+        ("85", "occlusal", "caries",      "planned",  ""),
+        ("16", "occlusal", "caries",      "planned",  "Primer molar permanente, caries oclusal"),
+    ]
+    for st in lucas_states:
+        add_tooth_state(lucas, *st)
+
+    print(f"  Cargados estados dentales:")
+    print(f"    Pedro Mendez:  {len(pedro_states)} (caso adulto historial mixto)")
+    print(f"    Maria Lopez:   {len(maria_states)} (plan en curso)")
+    print(f"    Lucas Sosa:    {len(lucas_states)} (caso pediatrico, mezcla temp/perm)")
+else:
+    print("\n[9/9] clinic_dental no esta instalado — skip odontogramas demo.")
+
 env.cr.commit()
 
 print("\n" + "=" * 60)
@@ -801,4 +875,6 @@ print(f"Appointments FUN:          {env['clinic.appointment'].search_count([('lo
 print(f"Total appointments:        {env['clinic.appointment'].search_count([])}")
 print(f"Dias extras (demo):        {env['clinic.schedule.extra_day'].search_count([])}")
 print(f"Vacaciones / leaves (demo): {env['resource.calendar.leaves'].search_count([('calendar_id.name', 'like', 'Horario')])}")
+if "clinic.dental.tooth.state" in env:
+    print(f"Tooth states (demo):       {env['clinic.dental.tooth.state'].search_count([])}")
 print("=" * 60)
