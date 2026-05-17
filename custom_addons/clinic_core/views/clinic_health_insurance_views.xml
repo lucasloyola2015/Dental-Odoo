@@ -23,6 +23,33 @@
                     <sheet>
                         <widget name="web_ribbon" title="Archivada" bg_color="text-bg-danger" invisible="active"/>
                         <field name="active" invisible="1"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_tariffs" type="object"
+                                    class="oe_stat_button" icon="fa-dollar"
+                                    invisible="not tariff_count">
+                                <field name="tariff_count" widget="statinfo" string="Tarifas"/>
+                            </button>
+                            <button name="action_view_copayments" type="object"
+                                    class="oe_stat_button" icon="fa-user"
+                                    invisible="not copayment_count">
+                                <field name="copayment_count" widget="statinfo" string="Copagos"/>
+                            </button>
+                            <button name="action_view_bond_systems" type="object"
+                                    class="oe_stat_button" icon="fa-ticket"
+                                    invisible="not bond_system_count">
+                                <field name="bond_system_count" widget="statinfo" string="Bonos"/>
+                            </button>
+                            <button name="action_view_practice_codes" type="object"
+                                    class="oe_stat_button" icon="fa-tags"
+                                    invisible="not practice_code_count">
+                                <field name="practice_code_count" widget="statinfo" string="Códigos"/>
+                            </button>
+                            <button name="action_view_insurance_routes" type="object"
+                                    class="oe_stat_button" icon="fa-share-alt"
+                                    invisible="not insurance_route_count">
+                                <field name="insurance_route_count" widget="statinfo" string="Vías"/>
+                            </button>
+                        </div>
                         <div class="oe_title">
                             <label for="name"/>
                             <h1>
