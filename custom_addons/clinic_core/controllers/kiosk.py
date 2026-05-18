@@ -1,5 +1,13 @@
-"""HTTP controllers for the clinic kiosk (self check-in)."""
-from datetime import datetime, time
+"""HTTP controllers for the clinic kiosk (self check-in).
+
+All date/time math is done in the kiosk's location timezone. Internally,
+Odoo stores datetimes as naive UTC; we convert at the boundary so the
+user-facing values (and "minutes until appointment") are always in local
+time.
+"""
+from datetime import datetime, time, timedelta
+
+import pytz
 
 from odoo import fields, http
 from odoo.http import request
@@ -13,6 +21,30 @@ class ClinicKioskController(http.Controller):
             .sudo()
             .search([("token", "=", token), ("active", "=", True)], limit=1)
         )
+
+    def _kiosk_tz(self, kiosk):
+        return pytz.timezone(kiosk.location_id.tz or "America/Argentina/Buenos_Aires")
+
+    def _utc_naive(self, local_dt):
+        """Strip tzinfo after converting to UTC, so it can be compared to Odoo's
+        naive UTC datetimes in the ORM."""
+        return local_dt.astimezone(pytz.UTC).replace(tzinfo=None)
+
+    def _appt_to_dict(self, appt, tz, now_local):
+        """Serialize an appointment with local-time fields + minutes_until."""
+        start_utc = pytz.UTC.localize(appt.start_datetime)
+        start_local = start_utc.astimezone(tz)
+        delta_min = int((start_local - now_local).total_seconds() // 60)
+        return {
+            "id": appt.id,
+            "time": start_local.strftime("%H:%M"),
+            "date": start_local.strftime("%Y-%m-%d"),
+            "practitioner": appt.practitioner_id.name or "",
+            "practice": (appt.practice_id.display_name if appt.practice_id else ""),
+            "patient": appt.patient_id.name or "",
+            "state": appt.state,
+            "minutes_until": delta_min,
+        }
 
     # ----------------------------- Page render -----------------------------
     @http.route(
@@ -47,16 +79,19 @@ class ClinicKioskController(http.Controller):
         if not dni:
             return {"error": "Ingresá tu DNI."}
 
-        today = fields.Date.context_today(kiosk)
-        today_start = datetime.combine(today, time.min)
-        today_end = datetime.combine(today, time.max)
+        tz = self._kiosk_tz(kiosk)
+        now_local = datetime.now(tz)
+        today_local = now_local.date()
+        today_start_local = tz.localize(datetime.combine(today_local, time.min))
+        today_end_local = tz.localize(datetime.combine(today_local, time.max))
+
         appts = (
             request.env["clinic.appointment"]
             .sudo()
             .search([
                 ("location_id", "=", kiosk.location_id.id),
-                ("start_datetime", ">=", today_start),
-                ("start_datetime", "<=", today_end),
+                ("start_datetime", ">=", self._utc_naive(today_start_local)),
+                ("start_datetime", "<=", self._utc_naive(today_end_local)),
                 ("state", "in", ("pending", "booked", "checked-in", "arrived")),
                 ("patient_id.vat", "=", dni),
             ], order="start_datetime")
@@ -69,14 +104,7 @@ class ClinicKioskController(http.Controller):
             }
 
         return {
-            "appointments": [{
-                "id": a.id,
-                "time": a.start_datetime.strftime("%H:%M"),
-                "practitioner": a.practitioner_id.name or "",
-                "practice": (a.practice_id.display_name if a.practice_id else ""),
-                "patient": a.patient_id.name or "",
-                "state": a.state,
-            } for a in appts],
+            "appointments": [self._appt_to_dict(a, tz, now_local) for a in appts],
         }
 
     # ----------------------------- Confirm ---------------------------------
@@ -97,23 +125,20 @@ class ClinicKioskController(http.Controller):
         if not appt.exists() or appt.location_id != kiosk.location_id:
             return {"error": "Turno no encontrado."}
 
-        if appt.state in ("checked-in", "arrived"):
-            return {
-                "already_checked": True,
-                "patient": appt.patient_id.name,
-                "time": appt.start_datetime.strftime("%H:%M"),
-                "practitioner": appt.practitioner_id.name,
-            }
+        tz = self._kiosk_tz(kiosk)
+        now_local = datetime.now(tz)
+
         if appt.state == "fulfilled":
             return {"error": "Tu turno ya terminó."}
-        if appt.state not in ("pending", "booked"):
+        if appt.state not in ("pending", "booked", "checked-in", "arrived"):
             return {"error": "Tu turno no está en estado válido."}
 
-        appt.action_check_in()
-        kiosk.last_check_in_at = fields.Datetime.now()
-        return {
-            "ok": True,
-            "patient": appt.patient_id.name,
-            "time": appt.start_datetime.strftime("%H:%M"),
-            "practitioner": appt.practitioner_id.name,
-        }
+        already = appt.state in ("checked-in", "arrived")
+        if not already:
+            appt.action_check_in()
+            kiosk.last_check_in_at = fields.Datetime.now()
+
+        info = self._appt_to_dict(appt, tz, now_local)
+        info["already_checked"] = already
+        info["ok"] = True
+        return info

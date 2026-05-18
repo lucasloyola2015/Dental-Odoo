@@ -47,13 +47,31 @@
         screenSuccess.classList.add("hidden");
     }
 
+    function formatCountdown(minutes) {
+        if (minutes == null) return "";
+        if (minutes < -5) {
+            var late = -minutes;
+            if (late < 60) return "Tu turno era hace " + late + " min.";
+            return "Tu turno era hace " + Math.floor(late / 60) + "h " + (late % 60) + "m.";
+        }
+        if (minutes < 0) return "Tu turno era hace unos minutos. El profesional te llama enseguida.";
+        if (minutes === 0) return "Es tu turno ahora.";
+        if (minutes < 60) return "Faltan " + minutes + " minuto" + (minutes === 1 ? "" : "s") + " para tu turno.";
+        var h = Math.floor(minutes / 60);
+        var m = minutes % 60;
+        if (m === 0) return "Faltan " + h + " hora" + (h === 1 ? "" : "s") + " para tu turno.";
+        return "Faltan " + h + "h " + m + "m para tu turno.";
+    }
+
     function showSuccess(res) {
         screenDni.classList.add("hidden");
         screenSuccess.classList.remove("hidden");
         successName.textContent = (res.patient || "") + (res.already_checked ? " (ya estabas registrado)" : "");
+        var countdownText = formatCountdown(res.minutes_until);
         successInfo.innerHTML =
             '<div class="time">' + (res.time || "") + '</div>' +
-            '<div class="practitioner">con ' + (res.practitioner || "") + '</div>';
+            '<div class="practitioner">con ' + (res.practitioner || "") + '</div>' +
+            (countdownText ? '<div class="countdown">' + countdownText + '</div>' : '');
         var n = 8;
         countdown.textContent = "Volviendo en " + n + "...";
         var iv = setInterval(function () {
@@ -76,9 +94,15 @@
                 showFeedback("No encontramos turno para hoy.", "error");
                 return;
             }
+            // Prefer pending/booked; if none, the nearest (smallest abs minutes_until).
             var apt = data.appointments.find(function (a) {
                 return a.state === "pending" || a.state === "booked";
-            }) || data.appointments[0];
+            });
+            if (!apt) {
+                apt = data.appointments.slice().sort(function (a, b) {
+                    return Math.abs(a.minutes_until) - Math.abs(b.minutes_until);
+                })[0];
+            }
             postJson("/kiosk/" + token + "/confirm", { token: token, appointment_id: apt.id }).then(function (res) {
                 if (res.error) { showFeedback(res.error, "error"); return; }
                 showSuccess(res);

@@ -55,6 +55,7 @@
                             <group string="Identificación">
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                 <field name="billing_route_id" options="{'no_create': True}"/>
+                                <field name="tz"/>
                                 <field name="sequence"/>
                             </group>
                             <group string="Contacto">

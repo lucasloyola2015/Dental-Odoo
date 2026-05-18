@@ -1,5 +1,12 @@
+import pytz
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+
+
+def _tz_get(self):
+    """Same pattern as res.users: list of all pytz timezones."""
+    return [(tz, tz) for tz in sorted(pytz.all_timezones)]
 
 
 class ClinicLocation(models.Model):
@@ -66,6 +73,18 @@ class ClinicLocation(models.Model):
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True, tracking=True)
     notes = fields.Text(string="Notas operativas")
+
+    tz = fields.Selection(
+        selection=_tz_get,
+        string="Zona horaria",
+        default="America/Argentina/Buenos_Aires",
+        required=True,
+        help=(
+            "Zona horaria de esta sede. Usada por el kiosko de check-in y por "
+            "cualquier feature que muestre horas locales al paciente. "
+            "Default: America/Argentina/Buenos_Aires (UTC-3)."
+        ),
+    )
 
     # ---- Notification toggles per sede ----
     send_confirmation_email = fields.Boolean(

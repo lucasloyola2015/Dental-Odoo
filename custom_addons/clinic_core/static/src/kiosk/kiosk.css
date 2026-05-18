@@ -87,6 +87,7 @@ body {
 .appt-card .time { font-size: 2rem; font-weight: bold; color: #1e4099; }
 .appt-card .practitioner { font-size: 1.4rem; }
 .appt-card .practice { color: #666; }
+.appt-card .countdown { margin-top: 14px; padding-top: 12px; border-top: 1px solid #d0e3d8; font-size: 1.5rem; color: #0f5132; font-weight: 600; }
 .reset-hint {
     text-align: center;
     margin-top: 12px;
