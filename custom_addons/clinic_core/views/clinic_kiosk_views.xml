@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_kiosk_list" model="ir.ui.view">
+            <field name="name">clinic.kiosk.list</field>
+            <field name="model">clinic.kiosk</field>
+            <field name="arch" type="xml">
+                <list string="Kioskos de check-in">
+                    <field name="name"/>
+                    <field name="location_id"/>
+                    <field name="last_check_in_at"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_kiosk_form" model="ir.ui.view">
+            <field name="name">clinic.kiosk.form</field>
+            <field name="model">clinic.kiosk</field>
+            <field name="arch" type="xml">
+                <form string="Kiosko de check-in">
+                    <header>
+                        <button name="action_rotate_token" type="object"
+                                string="🔄 Rotar token"
+                                confirm="Vas a invalidar la URL actual del kiosko. Vas a tener que abrir la nueva URL en la PC de la entrada. ¿Continuar?"/>
+                    </header>
+                    <sheet>
+                        <widget name="web_ribbon" title="Inactivo" bg_color="text-bg-danger" invisible="active"/>
+                        <field name="active" invisible="1"/>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name" placeholder="Ej: Recepción Roldán"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="location_id" options="{'no_create': True}"/>
+                                <field name="last_check_in_at" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="token" readonly="1"/>
+                                <field name="url" widget="url"/>
+                            </group>
+                        </group>
+                        <div class="alert alert-info">
+                            <strong>Cómo usarlo:</strong> abrí la URL de arriba en el navegador de la PC
+                            de la entrada (Chrome o Edge), apretá F11 para pantalla completa, y dejala
+                            corriendo. Los pacientes ingresan su DNI para confirmar asistencia.
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_clinic_kiosk" model="ir.actions.act_window">
+            <field name="name">Kioskos de check-in</field>
+            <field name="res_model">clinic.kiosk</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem
+            id="menu_clinic_kiosk"
+            name="Kioskos de check-in"
+            parent="menu_clinic_config_structure"
+            action="action_clinic_kiosk"
+            sequence="50"/>
+
+    </data>
+</odoo>

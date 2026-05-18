@@ -46,6 +46,8 @@ en este módulo.
         "views/clinic_practitioner_practice_views.xml",
         "views/clinic_appointment_views.xml",
         "views/clinic_dashboard_views.xml",
+        "views/clinic_kiosk_views.xml",
+        "views/kiosk_page.xml",
         "wizards/clinic_appointment_wizard_views.xml",
         "data/clinic_patient_sequence.xml",
         "data/clinic_specialty_data.xml",

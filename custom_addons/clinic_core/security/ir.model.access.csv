@@ -11,6 +11,8 @@ access_clinic_billing_route_secretariat,clinic.billing.route secretariat,model_c
 access_clinic_billing_route_admin,clinic.billing.route admin,model_clinic_billing_route,group_clinic_admin,1,1,1,1
 access_clinic_billing_route_pdf_field_secretariat,clinic.billing.route.pdf.field secretariat,model_clinic_billing_route_pdf_field,group_clinic_secretariat,1,0,0,0
 access_clinic_billing_route_pdf_field_admin,clinic.billing.route.pdf.field admin,model_clinic_billing_route_pdf_field,group_clinic_admin,1,1,1,1
+access_clinic_kiosk_secretariat,clinic.kiosk secretariat,model_clinic_kiosk,group_clinic_secretariat,1,0,0,0
+access_clinic_kiosk_admin,clinic.kiosk admin,model_clinic_kiosk,group_clinic_admin,1,1,1,1
 access_clinic_insurance_route_secretariat,clinic.insurance.route secretariat,model_clinic_insurance_route,group_clinic_secretariat,1,0,0,0
 access_clinic_insurance_route_admin,clinic.insurance.route admin,model_clinic_insurance_route,group_clinic_admin,1,1,1,1
 access_clinic_practice_secretariat,clinic.practice secretariat,model_clinic_practice,group_clinic_secretariat,1,0,0,0

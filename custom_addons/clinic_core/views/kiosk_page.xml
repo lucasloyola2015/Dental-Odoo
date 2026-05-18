@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="kiosk_page" name="Clinic Kiosk Check-in">
+        <html>
+            <head>
+                <title>Check-in</title>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+                <link rel="stylesheet" href="/clinic_core/static/src/kiosk/kiosk.css"/>
+            </head>
+            <body t-att-data-token="token">
+                <div class="kiosk-card">
+                    <div class="kiosk-header">
+                        <h1>Confirmá tu asistencia</h1>
+                        <div class="location">
+                            <t t-esc="kiosk.location_id.display_name"/>
+                        </div>
+                    </div>
+
+                    <div id="screen-dni">
+                        <div id="dni-display" class="dni-display empty"/>
+                        <div class="keypad">
+                            <button data-digit="1">1</button>
+                            <button data-digit="2">2</button>
+                            <button data-digit="3">3</button>
+                            <button data-digit="4">4</button>
+                            <button data-digit="5">5</button>
+                            <button data-digit="6">6</button>
+                            <button data-digit="7">7</button>
+                            <button data-digit="8">8</button>
+                            <button data-digit="9">9</button>
+                            <button class="key-clear" data-action="clear">Borrar</button>
+                            <button data-digit="0">0</button>
+                            <button class="key-ok" data-action="ok">Confirmar</button>
+                        </div>
+                        <div id="feedback" class="feedback hidden"/>
+                    </div>
+
+                    <div id="screen-success" class="hidden">
+                        <div class="feedback success">
+                            <div style="font-size: 2.4rem; font-weight: bold;">¡Bienvenido!</div>
+                            <div id="success-name" style="margin-top: 12px;"/>
+                            <div id="success-info" class="appt-card" style="border-color:#198754; background:#f0fdf4;"/>
+                            <div style="margin-top: 16px; font-size: 1.1rem;">Tomá asiento, te van a llamar.</div>
+                        </div>
+                        <div class="reset-hint" id="reset-countdown">Volviendo en 8...</div>
+                    </div>
+                </div>
+                <script src="/clinic_core/static/src/kiosk/kiosk.js"/>
+            </body>
+        </html>
+    </template>
+</odoo>

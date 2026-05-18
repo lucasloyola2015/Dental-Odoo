@@ -2,6 +2,7 @@ import base64
 
 from . import models
 from . import wizards
+from . import controllers
 
 
 # Human-readable labels for the F1 AOSS fields, used by the post_init seed.
